@@ -26,11 +26,12 @@ export async function upsertIssueAndEvent(
   params: {
     projectId: string
     environmentId: string
+    releaseId: string | null
     fingerprint: string
     event: SentryEventItem
   }
 ): Promise<UpsertResult> {
-  const { projectId, environmentId, fingerprint, event } = params
+  const { projectId, environmentId, releaseId, fingerprint, event } = params
 
   return db.transaction().execute(async (trx) => {
     const existingIssue = await trx
@@ -75,6 +76,7 @@ export async function upsertIssueAndEvent(
         project_id: projectId,
         issue_id: issue.id,
         environment_id: environmentId,
+        release_id: releaseId,
         event_id: event.event_id,
         timestamp: event.timestamp ? new Date(event.timestamp) : new Date(),
         level: event.level ?? null,
@@ -85,9 +87,23 @@ export async function upsertIssueAndEvent(
       .returning('id')
       .executeTakeFirst()
 
+    // ON CONFLICT DO NOTHING returns no row on a duplicate (Kafka retry),
+    // so the real Postgres id has to be looked up explicitly -- falling
+    // back to the client-supplied event_id string here would hand
+    // downstream consumers (symbolication's UPDATE ... WHERE id = eventId)
+    // the wrong identifier shape on every retried delivery.
+    const eventRow =
+      insertedEvent ??
+      (await trx
+        .selectFrom('event')
+        .select('id')
+        .where('project_id', '=', projectId)
+        .where('event_id', '=', event.event_id)
+        .executeTakeFirstOrThrow())
+
     return {
       issueId: issue.id,
-      eventId: insertedEvent?.id ?? event.event_id,
+      eventId: eventRow.id,
       created: !existingIssue,
     }
   })

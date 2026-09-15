@@ -28,6 +28,7 @@ describe('upsertIssueAndEvent', () => {
     const result = await upsertIssueAndEvent(db, {
       projectId,
       environmentId,
+      releaseId: null,
       fingerprint: 'fp-1',
       event,
     })
@@ -43,8 +44,8 @@ describe('upsertIssueAndEvent', () => {
     const eventA = { event_id: 'evt-a', environment: 'production', exception: { values: [{ type: 'Error', value: 'boom' }] } }
     const eventB = { event_id: 'evt-b', environment: 'production', exception: { values: [{ type: 'Error', value: 'boom' }] } }
 
-    const first = await upsertIssueAndEvent(db, { projectId, environmentId, fingerprint: 'fp-repeat', event: eventA })
-    const second = await upsertIssueAndEvent(db, { projectId, environmentId, fingerprint: 'fp-repeat', event: eventB })
+    const first = await upsertIssueAndEvent(db, { projectId, environmentId, releaseId: null, fingerprint: 'fp-repeat', event: eventA })
+    const second = await upsertIssueAndEvent(db, { projectId, environmentId, releaseId: null, fingerprint: 'fp-repeat', event: eventB })
 
     expect(second.issueId).toBe(first.issueId)
     expect(second.created).toBe(false)
@@ -65,8 +66,8 @@ describe('upsertIssueAndEvent', () => {
     const { projectId, environmentId } = await seedProjectAndEnvironment()
     const event = { event_id: 'evt-retry', environment: 'production', exception: { values: [{ type: 'Error', value: 'boom' }] } }
 
-    await upsertIssueAndEvent(db, { projectId, environmentId, fingerprint: 'fp-retry', event })
-    await upsertIssueAndEvent(db, { projectId, environmentId, fingerprint: 'fp-retry', event })
+    const first = await upsertIssueAndEvent(db, { projectId, environmentId, releaseId: null, fingerprint: 'fp-retry', event })
+    const retry = await upsertIssueAndEvent(db, { projectId, environmentId, releaseId: null, fingerprint: 'fp-retry', event })
 
     const events = await db
       .selectFrom('event')
@@ -75,5 +76,11 @@ describe('upsertIssueAndEvent', () => {
       .where('event_id', '=', 'evt-retry')
       .execute()
     expect(events).toHaveLength(1)
+
+    // The retry must resolve to the real Postgres row id, not fall back
+    // to the client-supplied event_id string (the bug this session found
+    // and fixed alongside threading releaseId through).
+    expect(retry.eventId).toBe(first.eventId)
+    expect(retry.eventId).toBe(events[0].id)
   })
 })
