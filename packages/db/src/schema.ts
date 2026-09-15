@@ -33,7 +33,7 @@ export interface IssueTable {
   culprit: string | null
   status: Generated<IssueStatus>
   first_seen: Generated<Date>
-  last_seen: Date
+  last_seen: Generated<Date>
   times_seen: Generated<number>
   grouping_raw_components: unknown
 }
@@ -42,7 +42,7 @@ export interface IssueEnvironmentTable {
   issue_id: string
   environment_id: string
   first_seen: Generated<Date>
-  last_seen: Date
+  last_seen: Generated<Date>
   times_seen: Generated<number>
 }
 
