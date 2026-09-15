@@ -8,6 +8,8 @@ export interface Database {
   event: EventTable
   release: ReleaseTable
   source_map_artifact: SourceMapArtifactTable
+  dashboard: DashboardTable
+  dashboard_widget: DashboardWidgetTable
 }
 
 export interface ProjectTable {
@@ -76,4 +78,27 @@ export interface SourceMapArtifactTable {
   storage_key: string
   content_type: string | null
   created_at: Generated<Date>
+}
+
+export type WidgetEnvironmentMode = 'inherit' | 'pin'
+
+export interface DashboardTable {
+  id: Generated<string>
+  project_id: string
+  name: Generated<string>
+  env_selector_default: string | null
+  created_at: Generated<Date>
+}
+
+export interface DashboardWidgetTable {
+  id: Generated<string>
+  dashboard_id: string
+  widget_type: string
+  title: string
+  layout: unknown
+  config: Generated<unknown>
+  environment_mode: Generated<WidgetEnvironmentMode>
+  pinned_environment_name: string | null
+  layout_updated_at: Generated<Date>
+  config_updated_at: Generated<Date>
 }
