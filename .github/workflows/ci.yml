@@ -1,0 +1,43 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with: { version: 9 }
+
+      - uses: actions/setup-node@v4
+        with: { node-version: 20, cache: pnpm }
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Start local dev stack
+        run: docker compose up -d
+
+      - name: Wait for Postgres and Redis
+        run: |
+          until docker compose exec -T postgres pg_isready -U flare; do sleep 2; done
+          until docker compose exec -T redis redis-cli ping; do sleep 2; done
+
+      - name: Run migrations
+        run: pnpm --filter @flare/db migrate:up
+        env:
+          DATABASE_URL: postgres://flare:flare@localhost:5432/flare
+
+      - run: pnpm turbo run lint typecheck build test
+        env:
+          DATABASE_URL: postgres://flare:flare@localhost:5432/flare
+          REDIS_URL: redis://localhost:6379
+          KAFKA_BROKERS: localhost:9092
+
+      - name: Tear down
+        if: always()
+        run: docker compose down -v
