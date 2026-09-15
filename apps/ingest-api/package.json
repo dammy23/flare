@@ -1,0 +1,23 @@
+{
+  "name": "@flare/ingest-api",
+  "version": "0.0.0",
+  "main": "dist/server.js",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "vitest run",
+    "lint": "echo 'no lint configured yet'",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "start": "node dist/server.js"
+  },
+  "dependencies": {
+    "@flare/db": "workspace:*",
+    "@flare/shared-types": "workspace:*",
+    "fastify": "^4.28.0",
+    "ioredis": "^5.4.0",
+    "kafkajs": "^2.2.4",
+    "kysely": "^0.27.0"
+  },
+  "devDependencies": {
+    "vitest": "^2.1.0"
+  }
+}
