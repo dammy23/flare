@@ -9,7 +9,7 @@ const brokers = [process.env.KAFKA_BROKERS ?? 'localhost:9092']
 const db = createDb(process.env.DATABASE_URL ?? 'postgres://flare:flare@localhost:5432/flare')
 const redis = new Redis(process.env.REDIS_URL ?? 'redis://localhost:6379')
 const producer = createKafkaProducer(brokers)
-const app = buildApp({ db, redis, producer })
+const app = buildApp({ db, redis, producer, storage: {} as never })
 
 let publicKey: string
 let projectId: string
