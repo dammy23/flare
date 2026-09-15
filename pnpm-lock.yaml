@@ -15,6 +15,28 @@ importers:
         specifier: ^5.6.0
         version: 5.9.3
 
+  apps/grouping-worker:
+    dependencies:
+      '@flare/db':
+        specifier: workspace:*
+        version: link:../../packages/db
+      '@flare/shared-types':
+        specifier: workspace:*
+        version: link:../../packages/shared-types
+      ioredis:
+        specifier: ^5.4.0
+        version: 5.11.1
+      kafkajs:
+        specifier: ^2.2.4
+        version: 2.2.4
+      kysely:
+        specifier: ^0.27.0
+        version: 0.27.6
+    devDependencies:
+      vitest:
+        specifier: ^2.1.0
+        version: 2.1.9(@types/node@26.5.1)
+
   apps/ingest-api:
     dependencies:
       '@flare/db':
