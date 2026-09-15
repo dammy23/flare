@@ -1,0 +1,22 @@
+{
+  "name": "@flare/query-api",
+  "version": "0.0.0",
+  "main": "dist/server.js",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "vitest run",
+    "lint": "echo 'no lint configured yet'",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "start": "node dist/server.js"
+  },
+  "dependencies": {
+    "@fastify/cors": "^9.0.0",
+    "@flare/db": "workspace:*",
+    "@flare/shared-types": "workspace:*",
+    "fastify": "^4.28.0",
+    "kysely": "^0.27.0"
+  },
+  "devDependencies": {
+    "vitest": "^2.1.0"
+  }
+}
