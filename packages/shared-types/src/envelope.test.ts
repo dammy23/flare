@@ -48,4 +48,9 @@ describe('SentryEventItemSchema', () => {
     })
     expect(result.exception?.values[0]?.stacktrace?.frames?.[0]?.in_app).toBe(true)
   })
+
+  it('carries an optional release string', () => {
+    const result = SentryEventItemSchema.parse({ event_id: 'abc', release: 'my-app@1.2.3' })
+    expect(result.release).toBe('my-app@1.2.3')
+  })
 })

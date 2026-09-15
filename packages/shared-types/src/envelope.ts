@@ -40,6 +40,7 @@ export const SentryEventItemSchema = z.object({
   event_id: z.string(),
   timestamp: z.union([z.number(), z.string()]).optional(),
   environment: z.string().default('production'),
+  release: z.string().optional(),
   level: z.string().optional(),
   message: z.string().optional(),
   exception: z.object({ values: z.array(ExceptionValueSchema) }).optional(),

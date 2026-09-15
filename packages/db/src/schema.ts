@@ -6,6 +6,8 @@ export interface Database {
   issue: IssueTable
   issue_environment: IssueEnvironmentTable
   event: EventTable
+  release: ReleaseTable
+  source_map_artifact: SourceMapArtifactTable
 }
 
 export interface ProjectTable {
@@ -51,10 +53,27 @@ export interface EventTable {
   project_id: string
   issue_id: string
   environment_id: string
+  release_id: string | null
   event_id: string
   timestamp: Date
   level: string | null
   message: string | null
   exception: unknown
   received_at: Generated<Date>
+}
+
+export interface ReleaseTable {
+  id: Generated<string>
+  project_id: string
+  version: string
+  created_at: Generated<Date>
+}
+
+export interface SourceMapArtifactTable {
+  id: Generated<string>
+  release_id: string
+  file_path: string
+  storage_key: string
+  content_type: string | null
+  created_at: Generated<Date>
 }
