@@ -2,13 +2,16 @@ import Fastify, { type FastifyInstance } from 'fastify'
 import cors from '@fastify/cors'
 import type { Kysely } from 'kysely'
 import type { Database } from '@flare/db'
+import type { Redis } from 'ioredis'
 import { registerIssueRoutes } from './routes/issues'
 import { registerProjectRoutes } from './routes/projects'
 import { registerDashboardRoutes } from './routes/dashboard'
 import { registerWidgetRoutes } from './routes/widgets'
+import { registerWidgetDataRoute } from './routes/widget-data'
 
 export interface AppDeps {
   db: Kysely<Database>
+  redis: Redis
 }
 
 declare module 'fastify' {
@@ -27,6 +30,7 @@ export function buildApp(deps: AppDeps): FastifyInstance {
   registerProjectRoutes(app)
   registerDashboardRoutes(app)
   registerWidgetRoutes(app)
+  registerWidgetDataRoute(app)
 
   return app
 }

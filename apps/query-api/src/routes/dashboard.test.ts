@@ -3,7 +3,7 @@ import { afterAll, describe, expect, it } from 'vitest'
 import { buildApp } from '../app'
 
 const db = createDb(process.env.DATABASE_URL ?? 'postgres://flare:flare@localhost:5432/flare')
-const app = buildApp({ db })
+const app = buildApp({ db, redis: {} as never })
 
 afterAll(async () => {
   await db.destroy()
