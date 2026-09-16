@@ -3,6 +3,7 @@ import cors from '@fastify/cors'
 import type { Kysely } from 'kysely'
 import type { Database } from '@flare/db'
 import { registerIssueRoutes } from './routes/issues'
+import { registerProjectRoutes } from './routes/projects'
 
 export interface AppDeps {
   db: Kysely<Database>
@@ -21,6 +22,7 @@ export function buildApp(deps: AppDeps): FastifyInstance {
 
   app.get('/healthz', async () => ({ status: 'ok' }))
   registerIssueRoutes(app)
+  registerProjectRoutes(app)
 
   return app
 }
