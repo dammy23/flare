@@ -4,6 +4,7 @@ import type { Kysely } from 'kysely'
 import type { Database } from '@flare/db'
 import { registerIssueRoutes } from './routes/issues'
 import { registerProjectRoutes } from './routes/projects'
+import { registerDashboardRoutes } from './routes/dashboard'
 
 export interface AppDeps {
   db: Kysely<Database>
@@ -23,6 +24,7 @@ export function buildApp(deps: AppDeps): FastifyInstance {
   app.get('/healthz', async () => ({ status: 'ok' }))
   registerIssueRoutes(app)
   registerProjectRoutes(app)
+  registerDashboardRoutes(app)
 
   return app
 }
