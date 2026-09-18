@@ -6,6 +6,8 @@ import { ReplayDetailPage } from './pages/ReplayDetailPage'
 import { ReplayListPage } from './pages/ReplayListPage'
 import { TraceDetailPage } from './pages/TraceDetailPage'
 import { FlowDetailPage } from './pages/FlowDetailPage'
+import { FlowBoardPage } from './pages/FlowBoardPage'
+import { FlowMapPage } from './pages/FlowMapPage'
 
 const PROJECT_ID = import.meta.env.VITE_PROJECT_ID ?? ''
 
@@ -19,6 +21,16 @@ function ReplayListRoute() {
   return <ReplayListPage projectId={projectId ?? ''} />
 }
 
+function FlowBoardRoute() {
+  const { projectId } = useParams<{ projectId: string }>()
+  return <FlowBoardPage projectId={projectId ?? ''} />
+}
+
+function FlowMapRoute() {
+  const { projectId } = useParams<{ projectId: string }>()
+  return <FlowMapPage projectId={projectId ?? ''} />
+}
+
 export function App() {
   return (
     <Routes>
@@ -28,6 +40,8 @@ export function App() {
       <Route path="/projects/:projectId/replays" element={<ReplayListRoute />} />
       <Route path="/traces/:traceId" element={<TraceDetailPage />} />
       <Route path="/flows/:flowTraceId" element={<FlowDetailPage />} />
+      <Route path="/projects/:projectId/flows/board" element={<FlowBoardRoute />} />
+      <Route path="/projects/:projectId/flows/map" element={<FlowMapRoute />} />
       <Route path="/replays/:replayId" element={<ReplayDetailPage />} />
     </Routes>
   )

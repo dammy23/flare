@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom'
-import { fetchFlow, type FlowStepDto, type FlowTraceDto } from '../api/query-client'
+import { Link, useParams } from 'react-router-dom'
+import { fetchFlow, type FlowDeviationsDto, type FlowStepDto, type FlowTraceDto } from '../api/query-client'
 
 function formatGap(ms: number): string {
   if (ms < 1000) return `${ms}ms`
@@ -14,7 +14,9 @@ function formatGap(ms: number): string {
 
 export function FlowDetailPage() {
   const { flowTraceId } = useParams<{ flowTraceId: string }>()
-  const [data, setData] = useState<{ trace: FlowTraceDto; steps: FlowStepDto[] } | null>(null)
+  const [data, setData] = useState<{ trace: FlowTraceDto; steps: FlowStepDto[]; deviations: FlowDeviationsDto | null } | null>(
+    null
+  )
 
   useEffect(() => {
     if (flowTraceId) fetchFlow(flowTraceId).then(setData)
@@ -22,12 +24,20 @@ export function FlowDetailPage() {
 
   if (!data) return <p>Loading…</p>
 
-  const { trace, steps } = data
+  const { trace, steps, deviations } = data
 
   return (
     <div>
       <h1>{trace.current_stage ?? trace.status}</h1>
       <p>{`Status: ${trace.status}`}</p>
+      {deviations && (deviations.skippedStages.length > 0 || deviations.unexpectedStages.length > 0) && (
+        <div>
+          {deviations.skippedStages.length > 0 && <p>{`Skipped stages: ${deviations.skippedStages.join(', ')}`}</p>}
+          {deviations.unexpectedStages.length > 0 && (
+            <p>{`Unexpected stages: ${deviations.unexpectedStages.join(', ')}`}</p>
+          )}
+        </div>
+      )}
       <ul>
         {steps.map((step, i) => {
           const gap = i > 0 ? new Date(step.occurred_at).getTime() - new Date(steps[i - 1].occurred_at).getTime() : null
@@ -38,6 +48,18 @@ export function FlowDetailPage() {
               <span>{` (${step.system})`}</span>
               <span>{` — ${step.occurred_at}`}</span>
               {step.status === 'error' && <span> [error]</span>}
+              {step.tech_trace_id && (
+                <span>
+                  {' '}
+                  <Link to={`/traces/${step.tech_trace_id}`}>view trace</Link>
+                </span>
+              )}
+              {step.issue_id && (
+                <span>
+                  {' '}
+                  <Link to={`/issues/${step.issue_id}`}>view issue</Link>
+                </span>
+              )}
             </li>
           )
         })}

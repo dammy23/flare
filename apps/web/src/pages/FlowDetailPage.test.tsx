@@ -16,9 +16,31 @@ const server = setupServer(
         last_activity_at: '2026-09-18T12:05:00.000Z',
       },
       steps: [
-        { id: 's1', stage_name: 'received', system: 'Dynamics', occurred_at: '2026-09-18T12:00:00.000Z', status: 'ok' },
-        { id: 's2', stage_name: 'mastered', system: 'MDM', occurred_at: '2026-09-18T12:05:00.000Z', status: 'ok' },
+        {
+          id: 's1',
+          stage_name: 'received',
+          system: 'Dynamics',
+          occurred_at: '2026-09-18T12:00:00.000Z',
+          status: 'ok',
+          tech_trace_id: null,
+          issue_id: null,
+        },
+        {
+          id: 's2',
+          stage_name: 'mastered',
+          system: 'MDM',
+          occurred_at: '2026-09-18T12:05:00.000Z',
+          status: 'ok',
+          tech_trace_id: 'trace-42',
+          issue_id: 'issue-7',
+        },
       ],
+      deviations: {
+        expectedStages: ['received', 'mastered', 'shipped'],
+        observedStages: ['received', 'mastered'],
+        skippedStages: ['shipped'],
+        unexpectedStages: [],
+      },
     })
   )
 )
@@ -42,5 +64,20 @@ describe('FlowDetailPage', () => {
     expect(screen.getByText('(Dynamics)')).toBeInTheDocument()
     expect(screen.getByText('(MDM)')).toBeInTheDocument()
     expect(screen.getByText('— 5.0m gap —')).toBeInTheDocument()
+  })
+
+  it('renders drill-down links for a step with tech_trace_id/issue_id, and skipped-stage deviations', async () => {
+    render(
+      <MemoryRouter initialEntries={['/flows/flow-1']}>
+        <Routes>
+          <Route path="/flows/:flowTraceId" element={<FlowDetailPage />} />
+        </Routes>
+      </MemoryRouter>
+    )
+
+    await waitFor(() => expect(screen.getByText('view trace')).toBeInTheDocument())
+    expect(screen.getByText('view trace').closest('a')).toHaveAttribute('href', '/traces/trace-42')
+    expect(screen.getByText('view issue').closest('a')).toHaveAttribute('href', '/issues/issue-7')
+    expect(screen.getByText('Skipped stages: shipped')).toBeInTheDocument()
   })
 })

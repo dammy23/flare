@@ -92,9 +92,42 @@ export interface FlowStepDto {
   system: string
   occurred_at: string
   status: string
+  tech_trace_id: string | null
+  issue_id: string | null
 }
 
-export async function fetchFlow(flowTraceId: string): Promise<{ trace: FlowTraceDto; steps: FlowStepDto[] }> {
+export interface FlowDeviationsDto {
+  expectedStages: string[]
+  observedStages: string[]
+  skippedStages: string[]
+  unexpectedStages: string[]
+}
+
+export async function fetchFlow(
+  flowTraceId: string
+): Promise<{ trace: FlowTraceDto; steps: FlowStepDto[]; deviations: FlowDeviationsDto | null }> {
   const response = await fetch(`${QUERY_API_BASE_URL}/api/v1/flows/${flowTraceId}`)
+  return response.json()
+}
+
+export interface FlowBoardGroup {
+  stage: string
+  traces: { id: string; status: string; lastActivityAt: string }[]
+}
+
+export async function fetchFlowBoard(projectId: string): Promise<FlowBoardGroup[]> {
+  const response = await fetch(`${QUERY_API_BASE_URL}/api/v1/flows/board?projectId=${encodeURIComponent(projectId)}`)
+  return response.json()
+}
+
+export interface FlowMapEdge {
+  from: string
+  to: string
+  count: number
+  avgDurationMs: number | null
+}
+
+export async function fetchFlowMap(projectId: string): Promise<FlowMapEdge[]> {
+  const response = await fetch(`${QUERY_API_BASE_URL}/api/v1/flows/map?projectId=${encodeURIComponent(projectId)}`)
   return response.json()
 }
