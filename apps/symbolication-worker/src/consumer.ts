@@ -1,24 +1,21 @@
-import { Kafka } from 'kafkajs'
+import { Worker, type Job } from 'bullmq'
+import type { Redis } from 'ioredis'
 
-export type MessageHandler = (value: Buffer) => Promise<void>
+export type MessageHandler = (data: unknown) => Promise<void>
 
-export async function startConsumer(
-  brokers: string[],
-  groupId: string,
-  topic: string,
-  onMessage: MessageHandler
-): Promise<() => Promise<void>> {
-  const kafka = new Kafka({ clientId: 'symbolication-worker', brokers })
-  const consumer = kafka.consumer({ groupId })
-
-  await consumer.connect()
-  await consumer.subscribe({ topic, fromBeginning: true })
-
-  await consumer.run({
-    eachMessage: async ({ message }) => {
-      if (message.value) await onMessage(message.value)
-    },
+export function startConsumer(
+  connection: Redis,
+  queueName: string,
+  onMessage: MessageHandler,
+  opts: { concurrency?: number } = {}
+): Worker {
+  const worker = new Worker(
+    queueName,
+    async (job: Job) => onMessage(job.data),
+    { connection, concurrency: opts.concurrency ?? 5 }
+  )
+  worker.on('failed', (job, err) => {
+    console.error(`[${queueName}] job ${job?.id} failed:`, err.message)
   })
-
-  return () => consumer.disconnect()
+  return worker
 }

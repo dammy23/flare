@@ -14,9 +14,9 @@ interface SymbolicationMessage {
 
 export async function handleSymbolicationMessage(
   deps: { db: Kysely<Database>; redis: Redis; storage: StorageClient },
-  rawValue: Buffer
+  data: unknown
 ): Promise<void> {
-  const message = JSON.parse(rawValue.toString('utf8')) as SymbolicationMessage
+  const message = data as SymbolicationMessage
 
   const cache = {
     get: (key: string) => deps.redis.get(key),
