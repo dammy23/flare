@@ -3,13 +3,21 @@ import { validateWidgetConfig, WidgetLayoutSchema, WidgetTypeSchema } from './wi
 
 describe('WidgetTypeSchema', () => {
   it('accepts the starter catalog types', () => {
-    for (const type of ['issues_over_time', 'top_issues', 'new_issues', 'events_by_environment', 'transaction_latency', 'replay_count']) {
+    for (const type of [
+      'issues_over_time',
+      'top_issues',
+      'new_issues',
+      'events_by_environment',
+      'transaction_latency',
+      'replay_count',
+      'flows_by_stage',
+    ]) {
       expect(WidgetTypeSchema.parse(type)).toBe(type)
     }
   })
 
   it('rejects a widget type outside the catalog', () => {
-    expect(() => WidgetTypeSchema.parse('flows_by_stage')).toThrow()
+    expect(() => WidgetTypeSchema.parse('nonexistent_widget_type')).toThrow()
   })
 })
 
@@ -33,6 +41,10 @@ describe('validateWidgetConfig', () => {
 
   it('defaults replay_count to a 14-day window', () => {
     expect(validateWidgetConfig('replay_count', {})).toEqual({ windowDays: 14 })
+  })
+
+  it('accepts an empty config for flows_by_stage (unconfigurable -- flows are not environment/window scoped)', () => {
+    expect(validateWidgetConfig('flows_by_stage', {})).toEqual({})
   })
 })
 

@@ -8,6 +8,7 @@ const STARTER_WIDGETS: Array<{ widget_type: string; title: string; layout: { x: 
   { widget_type: 'events_by_environment', title: 'Events by Environment', layout: { x: 6, y: 4, w: 6, h: 4 } },
   { widget_type: 'transaction_latency', title: 'Transaction Latency', layout: { x: 0, y: 8, w: 12, h: 4 } },
   { widget_type: 'replay_count', title: 'Replay Count', layout: { x: 0, y: 12, w: 6, h: 4 } },
+  { widget_type: 'flows_by_stage', title: 'Flows by Stage', layout: { x: 6, y: 12, w: 6, h: 4 } },
 ]
 
 export async function provisionDefaultDashboard(db: Kysely<Database>, projectId: string): Promise<string> {

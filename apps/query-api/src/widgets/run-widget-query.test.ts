@@ -1,4 +1,4 @@
-import { createDb } from '@flare/db'
+import { createDb, attachOrCreateFlowTrace, upsertFlowStep } from '@flare/db'
 import { afterAll, describe, expect, it } from 'vitest'
 import { runWidgetQuery } from './run-widget-query'
 
@@ -128,5 +128,34 @@ describe('runWidgetQuery', () => {
       { projectId: project.id, environmentName: null }
     )) as { count: number }
     expect(Number(result.count)).toBeGreaterThan(0)
+  })
+
+  it('flows_by_stage returns a count per current_stage, ignoring environmentName', async () => {
+    const { project } = await seedProjectWithData()
+    const entityId = `WO-widget-${Date.now()}`
+    const flowTraceId = await attachOrCreateFlowTrace(db, {
+      projectId: project.id,
+      reportedIds: [{ system: 'Dynamics', entityId }],
+    })
+    await upsertFlowStep(db, {
+      flowTraceId,
+      stageName: 'received',
+      system: 'Dynamics',
+      dedupKey: `dedup-widget-${Date.now()}`,
+      reportedIds: [],
+      techTraceId: null,
+      issueId: null,
+      occurredAt: new Date(),
+      status: 'ok',
+    })
+
+    const result = (await runWidgetQuery(
+      db,
+      'flows_by_stage',
+      {},
+      { projectId: project.id, environmentName: null }
+    )) as Array<{ current_stage: string; count: number }>
+    const row = result.find((r) => r.current_stage === 'received')
+    expect(Number(row?.count)).toBeGreaterThan(0)
   })
 })

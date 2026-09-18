@@ -108,6 +108,20 @@ async function transactionLatency(
   return query.orderBy('transaction_latency_rollup.hour_bucket', 'asc').execute()
 }
 
+async function flowsByStage(db: Kysely<Database>, _config: WidgetConfigFor<'flows_by_stage'>, scope: WidgetScope) {
+  // flow_trace has no environment_id (flows cross whole systems, not
+  // Sentry-style environments -- see the flow-tracing plan's Global
+  // Constraints), so scope.environmentName is deliberately ignored here,
+  // unlike every other widget query.
+  return db
+    .selectFrom('flow_trace')
+    .select(['current_stage', sql<number>`count(*)`.as('count')])
+    .where('project_id', '=', scope.projectId)
+    .where('status', '=', 'in_progress')
+    .groupBy('current_stage')
+    .execute()
+}
+
 async function replayCount(db: Kysely<Database>, config: WidgetConfigFor<'replay_count'>, scope: WidgetScope) {
   let query = db
     .selectFrom('replay')
@@ -143,5 +157,7 @@ export async function runWidgetQuery(
       return transactionLatency(db, validateWidgetConfig('transaction_latency', rawConfig), scope)
     case 'replay_count':
       return replayCount(db, validateWidgetConfig('replay_count', rawConfig), scope)
+    case 'flows_by_stage':
+      return flowsByStage(db, validateWidgetConfig('flows_by_stage', rawConfig), scope)
   }
 }

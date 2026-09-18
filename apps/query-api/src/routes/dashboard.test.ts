@@ -17,7 +17,7 @@ afterAll(async () => {
 })
 
 describe('GET /api/v1/projects/:projectId/dashboard', () => {
-  it('returns the provisioned dashboard with its four widgets', async () => {
+  it('returns the provisioned dashboard with its starter widgets', async () => {
     const project = await db
       .insertInto('project')
       .values({ name: 'Dashboard Fetch Test', slug: `dash-fetch-${Date.now()}`, public_key: `pk-dash-${Date.now()}` })
@@ -30,7 +30,7 @@ describe('GET /api/v1/projects/:projectId/dashboard', () => {
     expect(response.statusCode).toBe(200)
     const body = response.json()
     expect(body.projectId).toBe(project.id)
-    expect(body.widgets).toHaveLength(6)
+    expect(body.widgets).toHaveLength(7)
   })
 
   it('returns 404 when the project has no dashboard', async () => {
