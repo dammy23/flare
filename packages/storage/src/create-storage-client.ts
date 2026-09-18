@@ -1,4 +1,5 @@
 import { GetObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3'
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 
 export interface StorageClientConfig {
   endpoint: string
@@ -11,6 +12,7 @@ export interface StorageClientConfig {
 export interface StorageClient {
   putObject(key: string, body: Buffer, contentType?: string): Promise<void>
   getObject(key: string): Promise<Buffer>
+  getPresignedDownloadUrl(key: string, expirySeconds?: number): Promise<string>
 }
 
 export function createStorageClient(config: StorageClientConfig): StorageClient {
@@ -33,5 +35,7 @@ export function createStorageClient(config: StorageClientConfig): StorageClient 
       for await (const chunk of result.Body as AsyncIterable<Uint8Array>) chunks.push(chunk)
       return Buffer.concat(chunks)
     },
+    getPresignedDownloadUrl: (key, expirySeconds = 300) =>
+      getSignedUrl(s3, new GetObjectCommand({ Bucket: config.bucket, Key: key }), { expiresIn: expirySeconds }),
   }
 }

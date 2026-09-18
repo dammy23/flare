@@ -17,4 +17,16 @@ describe('createStorageClient', () => {
     const result = await client.getObject(key)
     expect(result.toString('utf8')).toBe('hello flare')
   })
+
+  it('generates a presigned URL that can itself be fetched to retrieve the object', async () => {
+    const key = `test/presign-${Date.now()}.txt`
+    await client.putObject(key, Buffer.from('presigned content'), 'text/plain')
+
+    const url = await client.getPresignedDownloadUrl(key, 60)
+    expect(url).toContain(key)
+
+    const response = await fetch(url)
+    const text = await response.text()
+    expect(text).toBe('presigned content')
+  })
 })
