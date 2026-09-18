@@ -48,6 +48,7 @@ describe('GET /api/v1/flows/:flowTraceId', () => {
     expect(body.trace.id).toBe(flowTraceId)
     expect(body.steps).toHaveLength(1)
     expect(body.steps[0].stage_name).toBe('received')
+    expect(body.deviations).toBeNull()
   })
 
   it('returns 404 for an unknown flow trace', async () => {

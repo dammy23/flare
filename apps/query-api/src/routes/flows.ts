@@ -1,4 +1,5 @@
 import type { FastifyInstance } from 'fastify'
+import { detectFlowDeviations } from '@flare/db'
 
 export function registerFlowRoutes(app: FastifyInstance): void {
   app.get<{ Params: { flowTraceId: string } }>('/api/v1/flows/:flowTraceId', async (request, reply) => {
@@ -19,6 +20,8 @@ export function registerFlowRoutes(app: FastifyInstance): void {
       .orderBy('occurred_at', 'asc')
       .execute()
 
-    return { trace, steps }
+    const deviations = await detectFlowDeviations(db, request.params.flowTraceId)
+
+    return { trace, steps, deviations }
   })
 }
