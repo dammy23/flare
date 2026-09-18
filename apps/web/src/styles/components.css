@@ -59,6 +59,13 @@
   font-weight: 600;
 }
 
+.flare-card--widget {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
 /* Badge */
 .flare-badge {
   display: inline-flex;
@@ -151,6 +158,41 @@
 .flare-field label {
   font-size: 12px;
   color: var(--flare-text-muted);
+}
+
+/* Stat */
+.flare-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+  gap: var(--flare-space-1);
+}
+
+.flare-stat__value {
+  font-size: 40px;
+  font-weight: 700;
+  color: var(--flare-accent);
+}
+
+.flare-stat__label {
+  font-size: 12px;
+  color: var(--flare-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* RankedList */
+.flare-ranked-list li {
+  display: flex;
+  justify-content: space-between;
+  padding: var(--flare-space-2) 0;
+  border-bottom: 1px solid var(--flare-border);
+}
+
+.flare-ranked-list li:last-child {
+  border-bottom: none;
 }
 
 /* EmptyState */

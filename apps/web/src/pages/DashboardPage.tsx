@@ -1,8 +1,11 @@
 import { useEffect, useState } from 'react'
-import GridLayout from 'react-grid-layout'
+import GridLayout, { WidthProvider } from 'react-grid-layout'
 import type { Dashboard } from '@flare/shared-types'
 import { fetchDashboard, fetchWidgetData } from '../api/query-client'
 import { WidgetChart } from '../widgets/WidgetChart'
+import { Card } from '../components/Card'
+
+const ResponsiveGridLayout = WidthProvider(GridLayout)
 
 export function DashboardPage({ projectId }: { projectId: string }) {
   const [dashboard, setDashboard] = useState<Dashboard | null>(null)
@@ -24,13 +27,14 @@ export function DashboardPage({ projectId }: { projectId: string }) {
   const layout = dashboard.widgets.map((widget) => ({ i: widget.id, ...widget.layout }))
 
   return (
-    <GridLayout layout={layout} cols={12} rowHeight={60} width={1200}>
+    <ResponsiveGridLayout layout={layout} cols={12} rowHeight={60} margin={[16, 16]}>
       {dashboard.widgets.map((widget) => (
         <div key={widget.id}>
-          <h3>{widget.title}</h3>
-          <WidgetChart data={dataByWidget[widget.id]} />
+          <Card title={widget.title} className="flare-card--widget">
+            <WidgetChart widgetType={widget.widgetType} data={dataByWidget[widget.id]} projectId={projectId} />
+          </Card>
         </div>
       ))}
-    </GridLayout>
+    </ResponsiveGridLayout>
   )
 }

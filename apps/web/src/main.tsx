@@ -7,6 +7,8 @@ import './styles/tokens.css'
 import './styles/base.css'
 import './styles/components.css'
 import './styles/layout.css'
+import 'react-grid-layout/css/styles.css'
+import 'react-resizable/css/styles.css'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
