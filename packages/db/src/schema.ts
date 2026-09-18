@@ -13,6 +13,8 @@ export interface Database {
   transaction: TransactionTable
   span: SpanTable
   transaction_latency_rollup: TransactionLatencyRollupTable
+  replay: ReplayTable
+  replay_segment: ReplaySegmentTable
 }
 
 export interface ProjectTable {
@@ -141,4 +143,24 @@ export interface TransactionLatencyRollupTable {
   p95_ms: number
   p99_ms: number
   count: number
+}
+
+export interface ReplayTable {
+  id: Generated<string>
+  project_id: string
+  environment_id: string
+  issue_id: string | null
+  session_id: string
+  duration_ms: Generated<number>
+  segment_count: Generated<number>
+  error_count: Generated<number>
+  started_at: Generated<Date>
+}
+
+export interface ReplaySegmentTable {
+  replay_id: string
+  sequence: number
+  storage_key: string
+  size_bytes: number
+  started_at: Generated<Date>
 }
