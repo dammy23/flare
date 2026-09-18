@@ -1,43 +1,40 @@
 import { createDb } from '@flare/db'
-import { Kafka } from 'kafkajs'
+import { Worker } from 'bullmq'
 import Redis from 'ioredis'
-import { afterAll, beforeAll, describe, expect, it } from 'vitest'
+import { afterAll, describe, expect, it } from 'vitest'
 import { handleErrorMessage } from './handle-message'
-import { createKafkaProducer } from './kafka/producer'
+import { createQueueProducer } from './queue/producer'
 
-const brokers = [process.env.KAFKA_BROKERS ?? 'localhost:9092']
 const db = createDb(process.env.DATABASE_URL ?? 'postgres://flare:flare@localhost:5432/flare')
 const redis = new Redis(process.env.REDIS_URL ?? 'redis://localhost:6379')
-const producer = createKafkaProducer(brokers)
-
-beforeAll(() => producer.connect())
+const queueConnection = new Redis(process.env.REDIS_URL ?? 'redis://localhost:6379', { maxRetriesPerRequest: null })
+const producer = createQueueProducer(queueConnection)
 
 afterAll(async () => {
-  await producer.disconnect()
+  await producer.close()
   await db.destroy()
   redis.disconnect()
+  queueConnection.disconnect()
 })
 
 describe('handleErrorMessage', () => {
-  it('resolves the environment, groups, and persists the event from a raw Kafka message', async () => {
+  it('resolves the environment, groups, and persists the event from a job payload', async () => {
     const project = await db
       .insertInto('project')
       .values({ name: 'Handle Msg Test', slug: `handle-msg-${Date.now()}`, public_key: `pk-handle-${Date.now()}` })
       .returningAll()
       .executeTakeFirstOrThrow()
 
-    const rawMessage = Buffer.from(
-      JSON.stringify({
-        projectId: project.id,
-        event: {
-          event_id: `evt-handle-${Date.now()}`,
-          environment: 'staging',
-          exception: { values: [{ type: 'TypeError', value: 'boom', stacktrace: { frames: [{ filename: 'app.js', function: 'main', in_app: true }] } }] },
-        },
-      })
-    )
+    const message = {
+      projectId: project.id,
+      event: {
+        event_id: `evt-handle-${Date.now()}`,
+        environment: 'staging',
+        exception: { values: [{ type: 'TypeError', value: 'boom', stacktrace: { frames: [{ filename: 'app.js', function: 'main', in_app: true }] } }] },
+      },
+    }
 
-    await handleErrorMessage(db, redis, producer, rawMessage)
+    await handleErrorMessage(db, redis, producer, message)
 
     const environment = await db
       .selectFrom('environment')
@@ -66,41 +63,35 @@ describe('handleErrorMessage', () => {
       .returningAll()
       .executeTakeFirstOrThrow()
 
-    const kafka = new Kafka({ clientId: 'test-consumer', brokers })
-    const consumer = kafka.consumer({ groupId: `symtrigger-test-${Date.now()}` })
-    await consumer.connect()
-    await consumer.subscribe({ topic: 'work.symbolication', fromBeginning: true })
-
-    const received: string[] = []
-    const consumePromise = new Promise<void>((resolve) => {
-      consumer.run({
-        eachMessage: async ({ message }) => {
-          received.push(message.value?.toString('utf8') ?? '')
-          resolve()
-        },
-      })
+    let resolveData!: (data: unknown) => void
+    const dataPromise = new Promise<unknown>((resolve) => {
+      resolveData = resolve
     })
-
-    const eventId = `evt-sym-${Date.now()}`
-    const rawMessage = Buffer.from(
-      JSON.stringify({
-        projectId: project.id,
-        event: {
-          event_id: eventId,
-          environment: 'production',
-          release: '1.0.0-symtrigger',
-          exception: { values: [{ type: 'TypeError', value: 'boom' }] },
-        },
-      })
+    const worker = new Worker(
+      'work.symbolication',
+      async (job) => {
+        resolveData(job.data)
+      },
+      { connection: queueConnection }
     )
 
-    await handleErrorMessage(db, redis, producer, rawMessage)
-    await consumePromise
-    await consumer.disconnect()
+    const eventId = `evt-sym-${Date.now()}`
+    const message = {
+      projectId: project.id,
+      event: {
+        event_id: eventId,
+        environment: 'production',
+        release: '1.0.0-symtrigger',
+        exception: { values: [{ type: 'TypeError', value: 'boom' }] },
+      },
+    }
 
-    const message = JSON.parse(received[0]) as { projectId: string; eventId: string; releaseId: string }
-    expect(message.projectId).toBe(project.id)
-    expect(message.releaseId).toBeTruthy()
+    await handleErrorMessage(db, redis, producer, message)
+    const published = (await dataPromise) as { projectId: string; eventId: string; releaseId: string }
+    await worker.close()
+
+    expect(published.projectId).toBe(project.id)
+    expect(published.releaseId).toBeTruthy()
 
     const event = await db
       .selectFrom('event')
@@ -108,7 +99,7 @@ describe('handleErrorMessage', () => {
       .where('project_id', '=', project.id)
       .where('event_id', '=', eventId)
       .executeTakeFirstOrThrow()
-    expect(event.release_id).toBe(message.releaseId)
-    expect(event.id).toBe(message.eventId)
+    expect(event.release_id).toBe(published.releaseId)
+    expect(event.id).toBe(published.eventId)
   })
 })

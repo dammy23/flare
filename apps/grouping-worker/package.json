@@ -12,8 +12,8 @@
   "dependencies": {
     "@flare/db": "workspace:*",
     "@flare/shared-types": "workspace:*",
+    "bullmq": "^5.28.0",
     "ioredis": "^5.4.0",
-    "kafkajs": "^2.2.4",
     "kysely": "^0.27.0"
   },
   "devDependencies": {

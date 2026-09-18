@@ -1,28 +1,29 @@
-import { Kafka } from 'kafkajs'
-import { describe, expect, it } from 'vitest'
+import { Queue } from 'bullmq'
+import Redis from 'ioredis'
+import { afterAll, describe, expect, it } from 'vitest'
 import { startConsumer } from './consumer'
 
-const brokers = [process.env.KAFKA_BROKERS ?? 'localhost:9092']
+const connection = new Redis(process.env.REDIS_URL ?? 'redis://localhost:6379', { maxRetriesPerRequest: null })
+
+afterAll(() => connection.disconnect())
 
 describe('startConsumer', () => {
-  it('invokes onMessage for each message produced to the topic', async () => {
-    const topic = `grouping-worker-test-${Date.now()}`
-    const kafka = new Kafka({ clientId: 'test-producer', brokers })
-    const producer = kafka.producer()
-    await producer.connect()
+  it('invokes onMessage for each job added to the queue', async () => {
+    const queueName = `grouping-worker-test-${Date.now()}`
+    const queue = new Queue(queueName, { connection })
 
-    const received: string[] = []
-    const stop = await startConsumer(brokers, `test-group-${Date.now()}`, topic, async (value) => {
-      received.push(value.toString('utf8'))
+    const received: unknown[] = []
+    const worker = startConsumer(connection, queueName, async (data) => {
+      received.push(data)
     })
 
-    await producer.send({ topic, messages: [{ value: 'hello-from-test' }] })
+    await queue.add('hello', { message: 'hello-from-test' })
 
     await new Promise((resolve) => setTimeout(resolve, 2000))
 
-    expect(received).toContain('hello-from-test')
+    expect(received).toContainEqual({ message: 'hello-from-test' })
 
-    await producer.disconnect()
-    await stop()
+    await worker.close()
+    await queue.close()
   })
 })

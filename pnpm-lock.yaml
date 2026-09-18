@@ -23,12 +23,12 @@ importers:
       '@flare/shared-types':
         specifier: workspace:*
         version: link:../../packages/shared-types
+      bullmq:
+        specifier: ^5.28.0
+        version: 5.81.5
       ioredis:
         specifier: ^5.4.0
         version: 5.11.1
-      kafkajs:
-        specifier: ^2.2.4
-        version: 2.2.4
       kysely:
         specifier: ^0.27.0
         version: 0.27.6
