@@ -2,6 +2,7 @@ import { createDb, provisionDefaultDashboard } from '@flare/db'
 import Redis from 'ioredis'
 import { afterAll, describe, expect, it } from 'vitest'
 import { buildApp } from '../app'
+import { createAuthCookie } from '../auth/test-auth-helper'
 
 const db = createDb(process.env.DATABASE_URL ?? 'postgres://flare:flare@localhost:5432/flare')
 const redis = new Redis(process.env.REDIS_URL ?? 'redis://localhost:6379')
@@ -9,7 +10,7 @@ const queueConnection = new Redis(process.env.REDIS_URL ?? 'redis://localhost:63
   maxRetriesPerRequest: null,
   lazyConnect: true,
 })
-const app = buildApp({ db, redis, storage: {} as never, queueConnection })
+const app = buildApp({ db, redis, storage: {} as never, queueConnection, cookieSecret: 'test-secret' })
 
 afterAll(async () => {
   await db.destroy()
@@ -33,7 +34,8 @@ describe('GET /api/v1/widgets/:id/data', () => {
       .where('widget_type', '=', 'new_issues')
       .executeTakeFirstOrThrow()
 
-    const response = await app.inject({ method: 'GET', url: `/api/v1/widgets/${widget.id}/data` })
+    const cookie = await createAuthCookie(db, redis)
+    const response = await app.inject({ method: 'GET', url: `/api/v1/widgets/${widget.id}/data`, headers: { cookie } })
 
     expect(response.statusCode).toBe(200)
     expect(Array.isArray(response.json().data)).toBe(true)
@@ -43,10 +45,20 @@ describe('GET /api/v1/widgets/:id/data', () => {
   })
 
   it('returns 404 for an unknown widget', async () => {
+    const cookie = await createAuthCookie(db, redis)
+    const response = await app.inject({
+      method: 'GET',
+      url: '/api/v1/widgets/00000000-0000-0000-0000-000000000000/data',
+      headers: { cookie },
+    })
+    expect(response.statusCode).toBe(404)
+  })
+
+  it('returns 401 without a session', async () => {
     const response = await app.inject({
       method: 'GET',
       url: '/api/v1/widgets/00000000-0000-0000-0000-000000000000/data',
     })
-    expect(response.statusCode).toBe(404)
+    expect(response.statusCode).toBe(401)
   })
 })

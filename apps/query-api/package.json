@@ -12,10 +12,12 @@
   "dependencies": {
     "@bull-board/api": "^5.21.0",
     "@bull-board/fastify": "^5.21.0",
+    "@fastify/cookie": "^9.4.0",
     "@fastify/cors": "^9.0.0",
     "@flare/db": "workspace:*",
     "@flare/shared-types": "workspace:*",
     "@flare/storage": "workspace:*",
+    "bcryptjs": "^3.0.3",
     "bullmq": "^5.28.0",
     "fastify": "^4.28.0",
     "ioredis": "^5.4.0",

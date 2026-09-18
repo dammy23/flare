@@ -3,6 +3,7 @@ import { createStorageClient } from '@flare/storage'
 import Redis from 'ioredis'
 import { afterAll, describe, expect, it } from 'vitest'
 import { buildApp } from '../app'
+import { createAuthCookie } from '../auth/test-auth-helper'
 
 const db = createDb(process.env.DATABASE_URL ?? 'postgres://flare:flare@localhost:5432/flare')
 const redis = new Redis(process.env.REDIS_URL ?? 'redis://localhost:6379')
@@ -17,7 +18,7 @@ const queueConnection = new Redis(process.env.REDIS_URL ?? 'redis://localhost:63
   maxRetriesPerRequest: null,
   lazyConnect: true,
 })
-const app = buildApp({ db, redis, storage, queueConnection })
+const app = buildApp({ db, redis, storage, queueConnection, cookieSecret: 'test-secret' })
 
 afterAll(async () => {
   await db.destroy()
@@ -47,12 +48,21 @@ describe('replays', () => {
       .insertInto('replay_segment')
       .values({ replay_id: replay.id, sequence: 0, storage_key: `replays/${project.id}/${replay.id}/0.bin`, size_bytes: 10 })
       .execute()
+    const cookie = await createAuthCookie(db, redis)
 
-    const listResponse = await app.inject({ method: 'GET', url: `/api/v1/projects/${project.id}/replays` })
+    const listResponse = await app.inject({
+      method: 'GET',
+      url: `/api/v1/projects/${project.id}/replays`,
+      headers: { cookie },
+    })
     expect(listResponse.statusCode).toBe(200)
     expect(listResponse.json().some((r: { id: string }) => r.id === replay.id)).toBe(true)
 
-    const detailResponse = await app.inject({ method: 'GET', url: `/api/v1/replays/${replay.id}?projectId=${project.id}` })
+    const detailResponse = await app.inject({
+      method: 'GET',
+      url: `/api/v1/replays/${replay.id}?projectId=${project.id}`,
+      headers: { cookie },
+    })
     expect(detailResponse.statusCode).toBe(200)
     const body = detailResponse.json()
     expect(body.segments).toHaveLength(1)
@@ -66,6 +76,7 @@ describe('replays', () => {
     const crossProjectResponse = await app.inject({
       method: 'GET',
       url: `/api/v1/replays/${replay.id}?projectId=${otherProject.id}`,
+      headers: { cookie },
     })
     expect(crossProjectResponse.statusCode).toBe(404)
   })
@@ -76,15 +87,27 @@ describe('replays', () => {
       .values({ name: 'Unknown Replay Test', slug: `unknown-replay-${Date.now()}`, public_key: `pk-unknown-replay-${Date.now()}` })
       .returningAll()
       .executeTakeFirstOrThrow()
+    const cookie = await createAuthCookie(db, redis)
     const response = await app.inject({
       method: 'GET',
       url: `/api/v1/replays/00000000-0000-0000-0000-000000000000?projectId=${project.id}`,
+      headers: { cookie },
     })
     expect(response.statusCode).toBe(404)
   })
 
-  it('returns 404 when projectId is missing entirely', async () => {
-    const response = await app.inject({ method: 'GET', url: '/api/v1/replays/00000000-0000-0000-0000-000000000000' })
+  it('returns 404 when projectId is missing but a session exists', async () => {
+    const cookie = await createAuthCookie(db, redis)
+    const response = await app.inject({
+      method: 'GET',
+      url: '/api/v1/replays/00000000-0000-0000-0000-000000000000',
+      headers: { cookie },
+    })
     expect(response.statusCode).toBe(404)
+  })
+
+  it('returns 401 without a session', async () => {
+    const response = await app.inject({ method: 'GET', url: '/api/v1/replays/00000000-0000-0000-0000-000000000000' })
+    expect(response.statusCode).toBe(401)
   })
 })

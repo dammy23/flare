@@ -21,6 +21,8 @@ export interface Database {
   flow_alias: FlowAliasTable
   flow_definition: FlowDefinitionTable
   flow_step_definition: FlowStepDefinitionTable
+  user: UserTable
+  project_member: ProjectMemberTable
 }
 
 export interface ProjectTable {
@@ -227,4 +229,20 @@ export interface FlowAliasTable {
   entity_id: string
   first_seen: Generated<Date>
   last_seen: Generated<Date>
+}
+
+export interface UserTable {
+  id: Generated<string>
+  email: string
+  password_hash: string
+  name: string
+  is_admin: Generated<boolean>
+  created_at: Generated<Date>
+}
+
+export interface ProjectMemberTable {
+  project_id: string
+  user_id: string
+  role: Generated<string>
+  created_at: Generated<Date>
 }

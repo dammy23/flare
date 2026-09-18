@@ -4,6 +4,8 @@ import { provisionDefaultDashboard } from '@flare/db'
 
 export function registerProjectRoutes(app: FastifyInstance): void {
   app.post<{ Body: { name: string; slug: string } }>('/api/v1/projects', async (request, reply) => {
+    if (!request.currentUser?.isAdmin) return reply.code(403).send({ error: 'forbidden' })
+
     const { db } = app.deps
     const publicKey = randomBytes(16).toString('hex')
 

@@ -13,7 +13,8 @@ const storage = createStorageClient({
   secretAccessKey: process.env.S3_SECRET_KEY ?? 'flare12345',
   bucket: process.env.S3_BUCKET ?? 'flare-source-maps',
 })
-const app = buildApp({ db, redis, storage, queueConnection })
+const cookieSecret = process.env.COOKIE_SECRET ?? 'dev-secret-change-me-in-production'
+const app = buildApp({ db, redis, storage, queueConnection, cookieSecret })
 
 app.listen({ port: Number(process.env.PORT ?? 3001), host: '0.0.0.0' }).catch((error) => {
   app.log.error(error)

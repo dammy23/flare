@@ -24,12 +24,12 @@ export function registerQueueBoard(app: FastifyInstance, connection: Redis): voi
     serverAdapter,
   })
 
-  // No auth of its own, intentionally: query-api and web have no in-app
-  // login anywhere else either -- both sit behind SOCOTEC's SSO at the
-  // ingress level (see the original architecture plan's header
-  // assumptions). This route inherits that same ingress-level
-  // protection. If query-api is ever exposed without that ingress in
-  // front of it, this route is exposed too -- do not rely on the path
+  // No route-level auth here by design: gated centrally by app.ts's
+  // global onRequest hook, which requires a session AND request.currentUser.isAdmin
+  // for anything under /admin/queues (query-api moved off the original
+  // "SSO at ingress, no in-app auth" assumption when real in-app auth was
+  // built -- see the UI-redesign-and-auth plan doc). If that hook is ever
+  // removed, this route stops being protected -- do not rely on the path
   // name alone.
   app.register(serverAdapter.registerPlugin(), { basePath: '/admin/queues', prefix: '/admin/queues' })
 }
