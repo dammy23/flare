@@ -11,8 +11,8 @@ interface IngestTransactionMessage {
   event: unknown
 }
 
-export async function handleTransactionMessage(db: Kysely<Database>, redis: Redis, rawValue: Buffer): Promise<void> {
-  const parsed = JSON.parse(rawValue.toString('utf8')) as IngestTransactionMessage
+export async function handleTransactionMessage(db: Kysely<Database>, redis: Redis, data: unknown): Promise<void> {
+  const parsed = data as IngestTransactionMessage
   const transaction = TransactionItemSchema.parse(parsed.event)
 
   const environmentId = await resolveEnvironment(db, redis, parsed.projectId, transaction.environment)
