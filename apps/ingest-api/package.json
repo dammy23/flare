@@ -7,7 +7,8 @@
     "test": "vitest run",
     "lint": "echo 'no lint configured yet'",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "start": "node dist/server.js"
+    "start": "node dist/server.js",
+    "replay-raw-envelopes": "tsx src/scripts/replay-raw-envelopes.ts"
   },
   "dependencies": {
     "@fastify/multipart": "^8.3.0",
