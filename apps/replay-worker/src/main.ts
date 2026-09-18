@@ -4,9 +4,9 @@ import Redis from 'ioredis'
 import { startConsumer } from './consumer'
 import { handleReplayMessage } from './handle-message'
 
-const brokers = (process.env.KAFKA_BROKERS ?? 'localhost:9092').split(',')
 const db = createDb(process.env.DATABASE_URL ?? 'postgres://flare:flare@localhost:5432/flare')
 const redis = new Redis(process.env.REDIS_URL ?? 'redis://localhost:6379')
+const queueConnection = new Redis(process.env.REDIS_URL ?? 'redis://localhost:6379', { maxRetriesPerRequest: null })
 const storage = createStorageClient({
   endpoint: process.env.S3_ENDPOINT ?? 'http://localhost:9000',
   region: process.env.S3_REGION ?? 'us-east-1',
@@ -15,9 +15,4 @@ const storage = createStorageClient({
   bucket: process.env.S3_BUCKET ?? 'flare-source-maps',
 })
 
-startConsumer(brokers, 'replay-worker', 'ingest.replays', (value) => handleReplayMessage({ db, redis, storage }, value)).catch(
-  (error) => {
-    console.error(error)
-    process.exit(1)
-  }
-)
+startConsumer(queueConnection, 'ingest.replays', (data) => handleReplayMessage({ db, redis, storage }, data))

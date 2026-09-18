@@ -20,9 +20,9 @@ const sequenceCounters = new Map<string, number>()
 
 export async function handleReplayMessage(
   deps: { db: Kysely<Database>; redis: Redis; storage: StorageClient },
-  rawValue: Buffer
+  data: unknown
 ): Promise<void> {
-  const message = JSON.parse(rawValue.toString('utf8')) as IngestReplayMessage
+  const message = data as IngestReplayMessage
   const payload = Buffer.from(message.payload, 'base64')
 
   if (message.itemType === 'replay_event') {
