@@ -34,11 +34,11 @@ async function seedProjectAndDefinition() {
 
 async function seedTraceAtStage(projectId: string, definitionId: string, stage: string, lastActivityAt: Date) {
   const entityId = `WO-${Date.now()}-${Math.random()}`
-  const flowTraceId = await attachOrCreateFlowTrace(db, { projectId, reportedIds: [{ system: 'Dynamics', entityId }] })
+  const flowTraceId = await attachOrCreateFlowTrace(db, { projectId, reportedIds: [{ system: 'CRM', entityId }] })
   await upsertFlowStep(db, {
     flowTraceId,
     stageName: stage,
-    system: 'Dynamics',
+    system: 'CRM',
     dedupKey: `dedup-stall-${entityId}`,
     reportedIds: [],
     techTraceId: null,
@@ -80,12 +80,12 @@ describe('markStalledTraces', () => {
   it('leaves a trace with no flow_definition_id untouched regardless of age', async () => {
     const { project } = await seedProjectAndDefinition()
     const entityId = `WO-nodef-${Date.now()}`
-    const flowTraceId = await attachOrCreateFlowTrace(db, { projectId: project.id, reportedIds: [{ system: 'Dynamics', entityId }] })
+    const flowTraceId = await attachOrCreateFlowTrace(db, { projectId: project.id, reportedIds: [{ system: 'CRM', entityId }] })
     const twoHoursAgo = new Date(Date.now() - 2 * 60 * 60 * 1000)
     await upsertFlowStep(db, {
       flowTraceId,
       stageName: 'received',
-      system: 'Dynamics',
+      system: 'CRM',
       dedupKey: `dedup-nodef-${entityId}`,
       reportedIds: [],
       techTraceId: null,

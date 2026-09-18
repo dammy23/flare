@@ -23,9 +23,9 @@ describe('handleFlowCheckpointMessage', () => {
       projectId: project.id,
       checkpoint: {
         stage: 'received',
-        system: 'Dynamics',
-        entityIds: [{ system: 'Dynamics', entityId }],
-        dedupKey: `dynamics:${entityId}:received`,
+        system: 'CRM',
+        entityIds: [{ system: 'CRM', entityId }],
+        dedupKey: `crm:${entityId}:received`,
         occurredAt: new Date().toISOString(),
       },
     })
@@ -33,7 +33,7 @@ describe('handleFlowCheckpointMessage', () => {
     const alias = await db
       .selectFrom('flow_alias')
       .selectAll()
-      .where('system', '=', 'Dynamics')
+      .where('system', '=', 'CRM')
       .where('entity_id', '=', entityId)
       .executeTakeFirstOrThrow()
 
@@ -54,9 +54,9 @@ describe('handleFlowCheckpointMessage', () => {
       projectId: project.id,
       checkpoint: {
         stage: 'received',
-        system: 'Dynamics',
-        entityIds: [{ system: 'Dynamics', entityId: woId }],
-        dedupKey: `dynamics:${woId}:received`,
+        system: 'CRM',
+        entityIds: [{ system: 'CRM', entityId: woId }],
+        dedupKey: `crm:${woId}:received`,
         occurredAt: new Date().toISOString(),
       },
     })
@@ -65,34 +65,34 @@ describe('handleFlowCheckpointMessage', () => {
       projectId: project.id,
       checkpoint: {
         stage: 'mastered',
-        system: 'MDM',
+        system: 'MasterData',
         entityIds: [
-          { system: 'Dynamics', entityId: woId },
-          { system: 'MDM', entityId: masterId },
+          { system: 'CRM', entityId: woId },
+          { system: 'MasterData', entityId: masterId },
         ],
-        dedupKey: `mdm:${masterId}:mastered`,
+        dedupKey: `masterdata:${masterId}:mastered`,
         occurredAt: new Date().toISOString(),
       },
     })
 
-    const dynamicsAlias = await db
+    const crmAlias = await db
       .selectFrom('flow_alias')
       .selectAll()
-      .where('system', '=', 'Dynamics')
+      .where('system', '=', 'CRM')
       .where('entity_id', '=', woId)
       .executeTakeFirstOrThrow()
 
     const steps = await db
       .selectFrom('flow_step')
       .selectAll()
-      .where('flow_trace_id', '=', dynamicsAlias.flow_trace_id)
+      .where('flow_trace_id', '=', crmAlias.flow_trace_id)
       .execute()
     expect(steps).toHaveLength(2)
 
     const trace = await db
       .selectFrom('flow_trace')
       .selectAll()
-      .where('id', '=', dynamicsAlias.flow_trace_id)
+      .where('id', '=', crmAlias.flow_trace_id)
       .executeTakeFirstOrThrow()
     expect(trace.current_stage).toBe('mastered')
   })

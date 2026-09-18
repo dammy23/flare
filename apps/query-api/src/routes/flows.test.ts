@@ -30,14 +30,14 @@ describe('GET /api/v1/flows/:flowTraceId', () => {
     const entityId = `WO-${Date.now()}`
     const flowTraceId = await attachOrCreateFlowTrace(db, {
       projectId: project.id,
-      reportedIds: [{ system: 'Dynamics', entityId }],
+      reportedIds: [{ system: 'CRM', entityId }],
     })
     await upsertFlowStep(db, {
       flowTraceId,
       stageName: 'received',
-      system: 'Dynamics',
+      system: 'CRM',
       dedupKey: `dedup-route-${Date.now()}`,
-      reportedIds: [{ system: 'Dynamics', entityId }],
+      reportedIds: [{ system: 'CRM', entityId }],
       techTraceId: null,
       issueId: null,
       occurredAt: new Date(),
@@ -114,11 +114,11 @@ describe('GET /api/v1/flows/board', () => {
       .executeTakeFirstOrThrow()
 
     const entityId = `WO-board-${Date.now()}`
-    const flowTraceId = await attachOrCreateFlowTrace(db, { projectId: project.id, reportedIds: [{ system: 'Dynamics', entityId }] })
+    const flowTraceId = await attachOrCreateFlowTrace(db, { projectId: project.id, reportedIds: [{ system: 'CRM', entityId }] })
     await upsertFlowStep(db, {
       flowTraceId,
       stageName: 'received',
-      system: 'Dynamics',
+      system: 'CRM',
       dedupKey: `dedup-board-${Date.now()}`,
       reportedIds: [],
       techTraceId: null,
@@ -155,12 +155,12 @@ describe('GET /api/v1/flows/map', () => {
       .executeTakeFirstOrThrow()
 
     const entityId = `WO-map-${Date.now()}`
-    const flowTraceId = await attachOrCreateFlowTrace(db, { projectId: project.id, reportedIds: [{ system: 'Dynamics', entityId }] })
+    const flowTraceId = await attachOrCreateFlowTrace(db, { projectId: project.id, reportedIds: [{ system: 'CRM', entityId }] })
     const start = new Date()
     await upsertFlowStep(db, {
       flowTraceId,
       stageName: 'received',
-      system: 'Dynamics',
+      system: 'CRM',
       dedupKey: `dedup-map-received-${Date.now()}`,
       reportedIds: [],
       techTraceId: null,
@@ -171,7 +171,7 @@ describe('GET /api/v1/flows/map', () => {
     await upsertFlowStep(db, {
       flowTraceId,
       stageName: 'mastered',
-      system: 'MDM',
+      system: 'MasterData',
       dedupKey: `dedup-map-mastered-${Date.now()}`,
       reportedIds: [],
       techTraceId: null,

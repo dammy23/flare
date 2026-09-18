@@ -15,7 +15,7 @@ async function seedTrace() {
     .executeTakeFirstOrThrow()
   const flowTraceId = await attachOrCreateFlowTrace(db, {
     projectId: project.id,
-    reportedIds: [{ system: 'Dynamics', entityId: `WO-${Date.now()}` }],
+    reportedIds: [{ system: 'CRM', entityId: `WO-${Date.now()}` }],
   })
   return flowTraceId
 }
@@ -28,7 +28,7 @@ describe('upsertFlowStep', () => {
     await upsertFlowStep(db, {
       flowTraceId,
       stageName: 'received',
-      system: 'Dynamics',
+      system: 'CRM',
       dedupKey: `dedup-${Date.now()}`,
       reportedIds: [],
       techTraceId: null,
@@ -49,7 +49,7 @@ describe('upsertFlowStep', () => {
     await upsertFlowStep(db, {
       flowTraceId,
       stageName: 'received',
-      system: 'Dynamics',
+      system: 'CRM',
       dedupKey,
       reportedIds: [],
       techTraceId: null,
@@ -60,7 +60,7 @@ describe('upsertFlowStep', () => {
     await upsertFlowStep(db, {
       flowTraceId,
       stageName: 'received',
-      system: 'Dynamics',
+      system: 'CRM',
       dedupKey,
       reportedIds: [],
       techTraceId: null,
@@ -81,7 +81,7 @@ describe('upsertFlowStep', () => {
     await upsertFlowStep(db, {
       flowTraceId,
       stageName: 'shipped',
-      system: 'AMS2',
+      system: 'FieldOps',
       dedupKey: `dedup-later-${Date.now()}`,
       reportedIds: [],
       techTraceId: null,
@@ -93,7 +93,7 @@ describe('upsertFlowStep', () => {
     await upsertFlowStep(db, {
       flowTraceId,
       stageName: 'received',
-      system: 'Dynamics',
+      system: 'CRM',
       dedupKey: `dedup-earlier-${Date.now()}`,
       reportedIds: [],
       techTraceId: null,

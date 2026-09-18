@@ -21,13 +21,13 @@ describe('attachOrCreateFlowTrace', () => {
 
     const flowTraceId = await attachOrCreateFlowTrace(db, {
       projectId: project.id,
-      reportedIds: [{ system: 'Dynamics', entityId }],
+      reportedIds: [{ system: 'CRM', entityId }],
     })
 
     const alias = await db
       .selectFrom('flow_alias')
       .selectAll()
-      .where('system', '=', 'Dynamics')
+      .where('system', '=', 'CRM')
       .where('entity_id', '=', entityId)
       .executeTakeFirstOrThrow()
     expect(alias.flow_trace_id).toBe(flowTraceId)
@@ -40,14 +40,14 @@ describe('attachOrCreateFlowTrace', () => {
 
     const firstTraceId = await attachOrCreateFlowTrace(db, {
       projectId: project.id,
-      reportedIds: [{ system: 'Dynamics', entityId: woId }],
+      reportedIds: [{ system: 'CRM', entityId: woId }],
     })
 
     const secondTraceId = await attachOrCreateFlowTrace(db, {
       projectId: project.id,
       reportedIds: [
-        { system: 'Dynamics', entityId: woId },
-        { system: 'MDM', entityId: masterId },
+        { system: 'CRM', entityId: woId },
+        { system: 'MasterData', entityId: masterId },
       ],
     })
 
@@ -56,7 +56,7 @@ describe('attachOrCreateFlowTrace', () => {
     const masterAlias = await db
       .selectFrom('flow_alias')
       .selectAll()
-      .where('system', '=', 'MDM')
+      .where('system', '=', 'MasterData')
       .where('entity_id', '=', masterId)
       .executeTakeFirstOrThrow()
     expect(masterAlias.flow_trace_id).toBe(firstTraceId)
@@ -67,8 +67,8 @@ describe('attachOrCreateFlowTrace', () => {
     const entityId = `WO-${Date.now()}`
 
     const [a, b] = await Promise.all([
-      attachOrCreateFlowTrace(db, { projectId: project.id, reportedIds: [{ system: 'Dynamics', entityId }] }),
-      attachOrCreateFlowTrace(db, { projectId: project.id, reportedIds: [{ system: 'Dynamics', entityId }] }),
+      attachOrCreateFlowTrace(db, { projectId: project.id, reportedIds: [{ system: 'CRM', entityId }] }),
+      attachOrCreateFlowTrace(db, { projectId: project.id, reportedIds: [{ system: 'CRM', entityId }] }),
     ])
 
     expect(a).toBe(b)
@@ -76,7 +76,7 @@ describe('attachOrCreateFlowTrace', () => {
     const aliases = await db
       .selectFrom('flow_alias')
       .selectAll()
-      .where('system', '=', 'Dynamics')
+      .where('system', '=', 'CRM')
       .where('entity_id', '=', entityId)
       .execute()
     expect(aliases).toHaveLength(1)

@@ -57,9 +57,9 @@ describe('POST /api/v1/flows/checkpoints', () => {
       headers: { authorization: `Bearer ${publicKey}`, 'content-type': 'application/json' },
       payload: {
         stage: 'received',
-        system: 'Dynamics',
-        entityIds: [{ system: 'Dynamics', entityId: 'WO-123' }],
-        dedupKey: `dynamics:WO-123:received:${Date.now()}`,
+        system: 'CRM',
+        entityIds: [{ system: 'CRM', entityId: 'WO-123' }],
+        dedupKey: `crm:WO-123:received:${Date.now()}`,
         occurredAt: new Date().toISOString(),
       },
     })
@@ -79,8 +79,8 @@ describe('POST /api/v1/flows/checkpoints', () => {
       headers: { 'content-type': 'application/json' },
       payload: {
         stage: 'received',
-        system: 'Dynamics',
-        entityIds: [{ system: 'Dynamics', entityId: 'WO-999' }],
+        system: 'CRM',
+        entityIds: [{ system: 'CRM', entityId: 'WO-999' }],
         dedupKey: 'irrelevant',
         occurredAt: new Date().toISOString(),
       },
@@ -95,8 +95,8 @@ describe('POST /api/v1/flows/checkpoints', () => {
       headers: { authorization: 'Bearer not-a-real-key', 'content-type': 'application/json' },
       payload: {
         stage: 'received',
-        system: 'Dynamics',
-        entityIds: [{ system: 'Dynamics', entityId: 'WO-999' }],
+        system: 'CRM',
+        entityIds: [{ system: 'CRM', entityId: 'WO-999' }],
         dedupKey: 'irrelevant',
         occurredAt: new Date().toISOString(),
       },
@@ -111,7 +111,7 @@ describe('POST /api/v1/flows/checkpoints', () => {
       headers: { authorization: `Bearer ${publicKey}`, 'content-type': 'application/json' },
       payload: {
         stage: 'received',
-        system: 'Dynamics',
+        system: 'CRM',
         entityIds: [],
         dedupKey: 'irrelevant',
         occurredAt: new Date().toISOString(),

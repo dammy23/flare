@@ -35,7 +35,7 @@ async function seedProjectAndDefinition() {
 
 async function seedTraceWithSteps(projectId: string, definitionId: string | null, stages: string[]) {
   const entityId = `WO-${Date.now()}-${Math.random()}`
-  const flowTraceId = await attachOrCreateFlowTrace(db, { projectId, reportedIds: [{ system: 'Dynamics', entityId }] })
+  const flowTraceId = await attachOrCreateFlowTrace(db, { projectId, reportedIds: [{ system: 'CRM', entityId }] })
   if (definitionId) {
     await db.updateTable('flow_trace').set({ flow_definition_id: definitionId }).where('id', '=', flowTraceId).execute()
   }
@@ -44,7 +44,7 @@ async function seedTraceWithSteps(projectId: string, definitionId: string | null
     await upsertFlowStep(db, {
       flowTraceId,
       stageName: stage,
-      system: 'Dynamics',
+      system: 'CRM',
       dedupKey: `dedup-deviation-${entityId}-${stage}`,
       reportedIds: [],
       techTraceId: null,

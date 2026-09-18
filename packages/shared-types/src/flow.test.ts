@@ -5,9 +5,9 @@ describe('FlowCheckpointSchema', () => {
   it('parses a minimal checkpoint and defaults status to ok', () => {
     const result = FlowCheckpointSchema.parse({
       stage: 'received',
-      system: 'Dynamics',
-      entityIds: [{ system: 'Dynamics', entityId: 'WO-123' }],
-      dedupKey: 'dynamics:WO-123:received',
+      system: 'CRM',
+      entityIds: [{ system: 'CRM', entityId: 'WO-123' }],
+      dedupKey: 'crm:WO-123:received',
       occurredAt: '2026-09-18T12:00:00.000Z',
     })
 
@@ -19,12 +19,12 @@ describe('FlowCheckpointSchema', () => {
   it('parses a checkpoint with a translation and optional trace/issue links', () => {
     const result = FlowCheckpointSchema.parse({
       stage: 'mastered',
-      system: 'MDM',
+      system: 'MasterData',
       entityIds: [
-        { system: 'Dynamics', entityId: 'WO-123' },
-        { system: 'MDM', entityId: 'MASTER-456' },
+        { system: 'CRM', entityId: 'WO-123' },
+        { system: 'MasterData', entityId: 'MASTER-456' },
       ],
-      dedupKey: 'mdm:MASTER-456:mastered',
+      dedupKey: 'masterdata:MASTER-456:mastered',
       occurredAt: '2026-09-18T12:05:00.000Z',
       techTraceId: 'trace-abc',
       issueId: null,
@@ -40,7 +40,7 @@ describe('FlowCheckpointSchema', () => {
     expect(() =>
       FlowCheckpointSchema.parse({
         stage: 'received',
-        system: 'Dynamics',
+        system: 'CRM',
         entityIds: [],
         dedupKey: 'x',
         occurredAt: '2026-09-18T12:00:00.000Z',

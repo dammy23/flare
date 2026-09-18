@@ -20,7 +20,7 @@ const server = setupServer(
         {
           id: 's1',
           stage_name: 'received',
-          system: 'Dynamics',
+          system: 'CRM',
           occurred_at: '2026-09-18T12:00:00.000Z',
           status: 'ok',
           tech_trace_id: null,
@@ -29,7 +29,7 @@ const server = setupServer(
         {
           id: 's2',
           stage_name: 'mastered',
-          system: 'MDM',
+          system: 'MasterData',
           occurred_at: '2026-09-18T12:05:00.000Z',
           status: 'ok',
           tech_trace_id: 'trace-42',
@@ -62,8 +62,8 @@ describe('FlowDetailPage', () => {
 
     await waitFor(() => expect(screen.getAllByText('mastered').length).toBeGreaterThan(0))
     expect(screen.getByText('received')).toBeInTheDocument()
-    expect(screen.getByText('(Dynamics)')).toBeInTheDocument()
-    expect(screen.getByText('(MDM)')).toBeInTheDocument()
+    expect(screen.getByText('(CRM)')).toBeInTheDocument()
+    expect(screen.getByText('(MasterData)')).toBeInTheDocument()
     expect(screen.getByText('— 5.0m gap —')).toBeInTheDocument()
   })
 

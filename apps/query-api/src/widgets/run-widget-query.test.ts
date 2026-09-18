@@ -135,12 +135,12 @@ describe('runWidgetQuery', () => {
     const entityId = `WO-widget-${Date.now()}`
     const flowTraceId = await attachOrCreateFlowTrace(db, {
       projectId: project.id,
-      reportedIds: [{ system: 'Dynamics', entityId }],
+      reportedIds: [{ system: 'CRM', entityId }],
     })
     await upsertFlowStep(db, {
       flowTraceId,
       stageName: 'received',
-      system: 'Dynamics',
+      system: 'CRM',
       dedupKey: `dedup-widget-${Date.now()}`,
       reportedIds: [],
       techTraceId: null,

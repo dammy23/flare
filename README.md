@@ -1,7 +1,7 @@
 # Flare
 
 Flare is a self-hosted, lightweight error-tracking and observability
-platform for SOCOTEC — a Sentry alternative built on a fixed stack of
+platform — a Sentry alternative built on a fixed stack of
 Node.js/TypeScript, React, PostgreSQL, Redis, and S3/MinIO, with no Kafka
 and no ClickHouse.
 
@@ -10,8 +10,9 @@ Sentry SDKs work unmodified), groups them into issues, resolves stack
 traces against uploaded source maps, tracks releases, renders
 per-project dashboards, captures technical traces and session replays,
 and stitches together cross-system business-process journeys (a
-work order moving through Dynamics → MDM → ClientHub → AMS2, for
-example) — all behind real in-app authentication.
+work order moving through a CRM, a master-data system, and one or more
+downstream systems that each re-key it, for example) — all behind real
+in-app authentication.
 
 ## Contents
 
