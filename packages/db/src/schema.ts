@@ -19,6 +19,8 @@ export interface Database {
   flow_trace: FlowTraceTable
   flow_step: FlowStepTable
   flow_alias: FlowAliasTable
+  flow_definition: FlowDefinitionTable
+  flow_step_definition: FlowStepDefinitionTable
 }
 
 export interface ProjectTable {
@@ -180,11 +182,28 @@ export interface RawEnvelopeTable {
 export interface FlowTraceTable {
   id: Generated<string>
   project_id: string
+  flow_definition_id: string | null
   status: Generated<string>
   current_stage: string | null
   started_at: Generated<Date>
   last_activity_at: Generated<Date>
   completed_at: Date | null
+}
+
+export interface FlowDefinitionTable {
+  id: Generated<string>
+  project_id: string
+  name: string
+  description: string | null
+}
+
+export interface FlowStepDefinitionTable {
+  id: Generated<string>
+  flow_definition_id: string
+  stage_name: string
+  sequence_order: number
+  expected_max_duration: string | null
+  is_terminal: Generated<boolean>
 }
 
 export interface FlowStepTable {
