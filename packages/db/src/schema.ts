@@ -74,6 +74,7 @@ export interface EventTable {
   level: string | null
   message: string | null
   exception: unknown
+  breadcrumbs: unknown
   received_at: Generated<Date>
 }
 

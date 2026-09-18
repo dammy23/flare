@@ -61,3 +61,8 @@ code,
 pre {
   font-family: var(--flare-font-mono);
 }
+
+.flare-text-muted {
+  color: var(--flare-text-muted);
+  font-size: 12px;
+}

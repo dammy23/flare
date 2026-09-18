@@ -51,6 +51,7 @@ async function seedIssueWithEvent() {
       timestamp: new Date(),
       message: 'boom',
       exception: '{}',
+      breadcrumbs: JSON.stringify({ values: [{ category: 'ui.click', message: 'button#submit' }] }),
     })
     .execute()
   return { project, issue }
@@ -94,6 +95,7 @@ describe('GET /api/v1/issues/:issueId', () => {
     const body = response.json()
     expect(body.id).toBe(issue.id)
     expect(body.events.length).toBeGreaterThan(0)
+    expect(body.events[0].breadcrumbs).toEqual({ values: [{ category: 'ui.click', message: 'button#submit' }] })
   })
 
   it('returns 404 for an unknown issue', async () => {

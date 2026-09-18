@@ -36,6 +36,15 @@ const ExceptionValueSchema = z.object({
   stacktrace: z.object({ frames: z.array(StackFrameSchema).optional() }).optional(),
 })
 
+const BreadcrumbSchema = z.object({
+  type: z.string().optional(),
+  category: z.string().optional(),
+  message: z.string().optional(),
+  level: z.string().optional(),
+  timestamp: z.union([z.number(), z.string()]).optional(),
+  data: z.record(z.unknown()).optional(),
+})
+
 export const SentryEventItemSchema = z.object({
   event_id: z.string(),
   timestamp: z.union([z.number(), z.string()]).optional(),
@@ -44,5 +53,6 @@ export const SentryEventItemSchema = z.object({
   level: z.string().optional(),
   message: z.string().optional(),
   exception: z.object({ values: z.array(ExceptionValueSchema) }).optional(),
+  breadcrumbs: z.object({ values: z.array(BreadcrumbSchema) }).optional(),
 })
 export type SentryEventItem = z.infer<typeof SentryEventItemSchema>

@@ -51,4 +51,40 @@ describe('IssueDetailSchema', () => {
     })
     expect(result.events).toHaveLength(1)
   })
+
+  it('carries an event without breadcrumbs (undefined, not required)', () => {
+    const result = IssueDetailSchema.parse({
+      id: 'issue-1',
+      title: 'x',
+      culprit: null,
+      status: 'unresolved',
+      timesSeen: 1,
+      firstSeen: '2026-09-01T00:00:00.000Z',
+      lastSeen: '2026-09-01T00:00:00.000Z',
+      events: [{ id: 'event-1', timestamp: '2026-09-01T00:00:00.000Z', message: null, exception: null }],
+    })
+    expect(result.events[0].breadcrumbs).toBeUndefined()
+  })
+
+  it('carries an event with breadcrumbs', () => {
+    const result = IssueDetailSchema.parse({
+      id: 'issue-1',
+      title: 'x',
+      culprit: null,
+      status: 'unresolved',
+      timesSeen: 1,
+      firstSeen: '2026-09-01T00:00:00.000Z',
+      lastSeen: '2026-09-01T00:00:00.000Z',
+      events: [
+        {
+          id: 'event-1',
+          timestamp: '2026-09-01T00:00:00.000Z',
+          message: null,
+          exception: null,
+          breadcrumbs: { values: [{ category: 'ui.click', message: 'button#submit' }] },
+        },
+      ],
+    })
+    expect((result.events[0].breadcrumbs as { values: unknown[] }).values).toHaveLength(1)
+  })
 })

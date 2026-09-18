@@ -29,6 +29,9 @@ const server = setupServer(
               },
             ],
           },
+          breadcrumbs: {
+            values: [{ category: 'ui.click', message: 'button#submit clicked', level: 'info' }],
+          },
         },
       ],
     })
@@ -52,5 +55,8 @@ describe('IssueDetailPage', () => {
     await waitFor(() => expect(screen.getByRole('heading', { level: 1, name: 'TypeError: boom' })).toBeInTheDocument())
     expect(screen.getByText('main')).toBeInTheDocument()
     expect(screen.getByText('original.js:10:2')).toBeInTheDocument()
+    expect(screen.getByText('Breadcrumbs')).toBeInTheDocument()
+    expect(screen.getByText('ui.click')).toBeInTheDocument()
+    expect(screen.getByText('button#submit clicked')).toBeInTheDocument()
   })
 })

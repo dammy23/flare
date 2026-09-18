@@ -19,6 +19,7 @@ export const IssueEventSchema = z.object({
   timestamp: z.string(),
   message: z.string().nullable(),
   exception: z.unknown(),
+  breadcrumbs: z.unknown(),
 })
 export type IssueEvent = z.infer<typeof IssueEventSchema>
 

@@ -60,6 +60,7 @@ export function registerIssueRoutes(app: FastifyInstance): void {
           timestamp: event.timestamp.toISOString(),
           message: event.message,
           exception: event.exception,
+          breadcrumbs: event.breadcrumbs,
         })),
       }
       return detail

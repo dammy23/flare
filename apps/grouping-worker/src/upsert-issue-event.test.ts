@@ -86,4 +86,45 @@ describe('upsertIssueAndEvent', () => {
     expect(retry.eventId).toBe(first.eventId)
     expect(retry.eventId).toBe(events[0].id)
   })
+
+  it('stores breadcrumbs when the event carries them', async () => {
+    const { projectId, environmentId } = await seedProjectAndEnvironment()
+    const event = {
+      event_id: 'evt-breadcrumbs',
+      environment: 'production',
+      exception: { values: [{ type: 'Error', value: 'boom' }] },
+      breadcrumbs: { values: [{ category: 'ui.click', message: 'button#submit', level: 'info' }] },
+    }
+
+    const result = await upsertIssueAndEvent(db, {
+      projectId,
+      environmentId,
+      releaseId: null,
+      fingerprint: 'fp-breadcrumbs',
+      event,
+    })
+
+    const stored = await db.selectFrom('event').selectAll().where('id', '=', result.eventId).executeTakeFirstOrThrow()
+    expect(stored.breadcrumbs).toEqual({ values: [{ category: 'ui.click', message: 'button#submit', level: 'info' }] })
+  })
+
+  it('stores null breadcrumbs when the event carries none', async () => {
+    const { projectId, environmentId } = await seedProjectAndEnvironment()
+    const event = {
+      event_id: 'evt-no-breadcrumbs',
+      environment: 'production',
+      exception: { values: [{ type: 'Error', value: 'boom' }] },
+    }
+
+    const result = await upsertIssueAndEvent(db, {
+      projectId,
+      environmentId,
+      releaseId: null,
+      fingerprint: 'fp-no-breadcrumbs',
+      event,
+    })
+
+    const stored = await db.selectFrom('event').selectAll().where('id', '=', result.eventId).executeTakeFirstOrThrow()
+    expect(stored.breadcrumbs).toBeNull()
+  })
 })

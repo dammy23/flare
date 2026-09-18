@@ -84,6 +84,7 @@ export async function upsertIssueAndEvent(
         level: event.level ?? null,
         message: event.message ?? null,
         exception: JSON.stringify(event.exception ?? null),
+        breadcrumbs: event.breadcrumbs ? JSON.stringify(event.breadcrumbs) : null,
       })
       .onConflict((oc) => oc.columns(['project_id', 'event_id']).doNothing())
       .returning('id')

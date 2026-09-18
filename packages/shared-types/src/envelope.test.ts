@@ -53,4 +53,23 @@ describe('SentryEventItemSchema', () => {
     const result = SentryEventItemSchema.parse({ event_id: 'abc', release: 'my-app@1.2.3' })
     expect(result.release).toBe('my-app@1.2.3')
   })
+
+  it('accepts breadcrumbs with a category, message, level, and timestamp', () => {
+    const result = SentryEventItemSchema.parse({
+      event_id: 'abc123',
+      breadcrumbs: {
+        values: [
+          { type: 'http', category: 'fetch', message: 'GET /api/widgets', level: 'info', timestamp: 1700000000 },
+          { category: 'ui.click', message: 'button#submit', level: 'info', timestamp: 1700000001 },
+        ],
+      },
+    })
+    expect(result.breadcrumbs?.values).toHaveLength(2)
+    expect(result.breadcrumbs?.values[0]?.category).toBe('fetch')
+  })
+
+  it('defaults breadcrumbs to undefined when absent', () => {
+    const result = SentryEventItemSchema.parse({ event_id: 'abc123' })
+    expect(result.breadcrumbs).toBeUndefined()
+  })
 })
