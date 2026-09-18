@@ -112,6 +112,12 @@
   margin-bottom: var(--flare-space-3);
 }
 
+.flare-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--flare-space-5);
+}
+
 .flare-auth-switch {
   margin-top: var(--flare-space-4);
   font-size: 13px;

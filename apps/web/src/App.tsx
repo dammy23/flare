@@ -1,6 +1,7 @@
 import { Navigate, Route, Routes, useParams } from 'react-router-dom'
 import { useAuth } from './AuthContext'
 import { AppShell } from './components/AppShell'
+import { RequireAdmin } from './components/RequireAdmin'
 import { PROJECT_ID } from './config'
 import { DashboardPage } from './pages/DashboardPage'
 import { IssueDetailPage } from './pages/IssueDetailPage'
@@ -13,6 +14,8 @@ import { TraceDetailPage } from './pages/TraceDetailPage'
 import { FlowDetailPage } from './pages/FlowDetailPage'
 import { FlowBoardPage } from './pages/FlowBoardPage'
 import { FlowMapPage } from './pages/FlowMapPage'
+import { ProjectsSettingsPage } from './pages/ProjectsSettingsPage'
+import { UsersSettingsPage } from './pages/UsersSettingsPage'
 
 function DashboardRoute() {
   const { projectId } = useParams<{ projectId: string }>()
@@ -47,6 +50,22 @@ function AuthenticatedApp() {
         <Route path="/projects/:projectId/flows/board" element={<FlowBoardRoute />} />
         <Route path="/projects/:projectId/flows/map" element={<FlowMapRoute />} />
         <Route path="/replays/:replayId" element={<ReplayDetailPage />} />
+        <Route
+          path="/settings/projects"
+          element={
+            <RequireAdmin>
+              <ProjectsSettingsPage />
+            </RequireAdmin>
+          }
+        />
+        <Route
+          path="/settings/users"
+          element={
+            <RequireAdmin>
+              <UsersSettingsPage />
+            </RequireAdmin>
+          }
+        />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </AppShell>

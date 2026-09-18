@@ -14,6 +14,7 @@ import { registerTraceRoutes } from './routes/traces'
 import { registerReplayRoutes } from './routes/replays'
 import { registerFlowRoutes } from './routes/flows'
 import { registerAuthRoutes } from './routes/auth'
+import { registerUserRoutes } from './routes/users'
 import { registerQueueBoard } from './queue-board'
 import { getCurrentUser, type CurrentUser } from './auth/current-user'
 
@@ -61,6 +62,7 @@ export function buildApp(deps: AppDeps): FastifyInstance {
 
   app.get('/healthz', async () => ({ status: 'ok' }))
   registerAuthRoutes(app)
+  registerUserRoutes(app)
   registerIssueRoutes(app)
   registerProjectRoutes(app)
   registerDashboardRoutes(app)

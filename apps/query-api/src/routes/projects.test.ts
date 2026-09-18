@@ -77,3 +77,55 @@ describe('POST /api/v1/projects', () => {
     expect(response.statusCode).toBe(401)
   })
 })
+
+describe('GET /api/v1/projects', () => {
+  it('lists projects for an admin', async () => {
+    const cookie = await createAuthCookie(db, redis, { isAdmin: true })
+    await app.inject({
+      method: 'POST',
+      url: '/api/v1/projects',
+      headers: { cookie },
+      payload: { name: 'List Test', slug: `list-test-${Date.now()}` },
+    })
+
+    const response = await app.inject({ method: 'GET', url: '/api/v1/projects', headers: { cookie } })
+    expect(response.statusCode).toBe(200)
+    const body = response.json()
+    expect(body.some((p: { name: string }) => p.name === 'List Test')).toBe(true)
+  })
+
+  it('returns 403 for a non-admin user', async () => {
+    const cookie = await createAuthCookie(db, redis, { isAdmin: false })
+    const response = await app.inject({ method: 'GET', url: '/api/v1/projects', headers: { cookie } })
+    expect(response.statusCode).toBe(403)
+  })
+})
+
+describe('DELETE /api/v1/projects/:id', () => {
+  it('deletes a project as an admin', async () => {
+    const cookie = await createAuthCookie(db, redis, { isAdmin: true })
+    const created = await app.inject({
+      method: 'POST',
+      url: '/api/v1/projects',
+      headers: { cookie },
+      payload: { name: 'Delete Test', slug: `delete-test-${Date.now()}` },
+    })
+    const projectId = created.json().id
+
+    const response = await app.inject({ method: 'DELETE', url: `/api/v1/projects/${projectId}`, headers: { cookie } })
+    expect(response.statusCode).toBe(204)
+
+    const gone = await db.selectFrom('project').selectAll().where('id', '=', projectId).executeTakeFirst()
+    expect(gone).toBeUndefined()
+  })
+
+  it('returns 403 for a non-admin user', async () => {
+    const cookie = await createAuthCookie(db, redis, { isAdmin: false })
+    const response = await app.inject({
+      method: 'DELETE',
+      url: '/api/v1/projects/00000000-0000-0000-0000-000000000000',
+      headers: { cookie },
+    })
+    expect(response.statusCode).toBe(403)
+  })
+})

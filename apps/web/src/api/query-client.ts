@@ -206,8 +206,27 @@ export interface ProjectSummary {
   publicKey: string
 }
 
+export async function fetchProjects(): Promise<ProjectSummary[]> {
+  return apiJson('/api/v1/projects')
+}
+
 export async function createProject(name: string, slug: string): Promise<ProjectSummary> {
   const response = await apiFetch('/api/v1/projects', { method: 'POST', body: JSON.stringify({ name, slug }) })
   if (!response.ok) throw new Error(await readErrorMessage(response, 'failed to create project'))
+  return response.json()
+}
+
+export async function deleteProject(projectId: string): Promise<void> {
+  const response = await apiFetch(`/api/v1/projects/${projectId}`, { method: 'DELETE' })
+  if (!response.ok) throw new Error(await readErrorMessage(response, 'failed to delete project'))
+}
+
+export async function fetchUsers(): Promise<CurrentUser[]> {
+  return apiJson('/api/v1/users')
+}
+
+export async function setUserAdmin(userId: string, isAdmin: boolean): Promise<CurrentUser> {
+  const response = await apiFetch(`/api/v1/users/${userId}`, { method: 'PATCH', body: JSON.stringify({ isAdmin }) })
+  if (!response.ok) throw new Error(await readErrorMessage(response, 'failed to update user'))
   return response.json()
 }

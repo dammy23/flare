@@ -3,6 +3,26 @@ import type { FastifyInstance } from 'fastify'
 import { provisionDefaultDashboard } from '@flare/db'
 
 export function registerProjectRoutes(app: FastifyInstance): void {
+  app.get('/api/v1/projects', async (request, reply) => {
+    if (!request.currentUser?.isAdmin) return reply.code(403).send({ error: 'forbidden' })
+
+    const rows = await app.deps.db.selectFrom('project').selectAll().orderBy('name', 'asc').execute()
+    return rows.map((row) => ({
+      id: row.id,
+      name: row.name,
+      slug: row.slug,
+      publicKey: row.public_key,
+      createdAt: row.created_at.toISOString(),
+    }))
+  })
+
+  app.delete<{ Params: { id: string } }>('/api/v1/projects/:id', async (request, reply) => {
+    if (!request.currentUser?.isAdmin) return reply.code(403).send({ error: 'forbidden' })
+
+    await app.deps.db.deleteFrom('project').where('id', '=', request.params.id).execute()
+    return reply.code(204).send()
+  })
+
   app.post<{ Body: { name: string; slug: string } }>('/api/v1/projects', async (request, reply) => {
     if (!request.currentUser?.isAdmin) return reply.code(403).send({ error: 'forbidden' })
 
