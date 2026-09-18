@@ -1,0 +1,20 @@
+{
+  "name": "@flare/retention-job",
+  "version": "0.0.0",
+  "main": "dist/run.js",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "vitest run",
+    "lint": "echo 'no lint configured yet'",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "start": "node dist/run.js"
+  },
+  "dependencies": {
+    "@flare/db": "workspace:*",
+    "@flare/storage": "workspace:*",
+    "kysely": "^0.27.0"
+  },
+  "devDependencies": {
+    "vitest": "^2.1.0"
+  }
+}

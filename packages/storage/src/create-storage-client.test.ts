@@ -29,4 +29,8 @@ describe('createStorageClient', () => {
     const text = await response.text()
     expect(text).toBe('presigned content')
   })
+
+  it('applies a lifecycle rule without throwing', async () => {
+    await expect(client.applyLifecycleRule('replay-segments-expiry', 'replays/', 30)).resolves.not.toThrow()
+  })
 })
