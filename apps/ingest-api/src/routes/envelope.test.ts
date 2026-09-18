@@ -80,7 +80,7 @@ describe('POST /api/:projectId/envelope/', () => {
     await consumePromise
     await consumer.disconnect()
 
-    expect(JSON.parse(received[0]).event_id).toBe(eventId)
+    expect(JSON.parse(received[0]).event.event_id).toBe(eventId)
   })
 
   it('returns 401 when the public key is unknown', async () => {
@@ -91,5 +91,52 @@ describe('POST /api/:projectId/envelope/', () => {
       payload: envelopeBuffer('irrelevant'),
     })
     expect(response.statusCode).toBe(401)
+  })
+
+  it('publishes a transaction item to ingest.transactions', async () => {
+    const kafka = new Kafka({ clientId: 'test-consumer-tx', brokers })
+    const consumer = kafka.consumer({ groupId: `envelope-tx-test-${Date.now()}` })
+    await consumer.connect()
+    await consumer.subscribe({ topic: 'ingest.transactions', fromBeginning: true })
+
+    const received: string[] = []
+    const consumePromise = new Promise<void>((resolve) => {
+      consumer.run({
+        eachMessage: async ({ message }) => {
+          received.push(message.value?.toString('utf8') ?? '')
+          resolve()
+        },
+      })
+    })
+
+    const eventId = `tx-${Date.now()}`
+    const payload = JSON.stringify({
+      event_id: eventId,
+      transaction: 'GET /api/widgets',
+      start_timestamp: 1700000000,
+      timestamp: 1700000000.2,
+      contexts: { trace: { trace_id: 'a'.repeat(32), span_id: 'b'.repeat(16) } },
+    })
+    const raw = Buffer.from(
+      [
+        JSON.stringify({ event_id: eventId }),
+        JSON.stringify({ type: 'transaction', length: Buffer.byteLength(payload) }),
+        payload,
+      ].join('\n') + '\n'
+    )
+
+    await app.inject({
+      method: 'POST',
+      url: `/api/${projectId}/envelope/`,
+      headers: {
+        'x-sentry-auth': `Sentry sentry_version=7, sentry_key=${publicKey}`,
+        'content-type': 'application/x-sentry-envelope',
+      },
+      payload: raw,
+    })
+
+    await consumePromise
+    await consumer.disconnect()
+    expect(JSON.parse(received[0]).event.transaction).toBe('GET /api/widgets')
   })
 })

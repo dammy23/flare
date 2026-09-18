@@ -1,5 +1,5 @@
 import type { FastifyInstance } from 'fastify'
-import { SentryEventItemSchema } from '@flare/shared-types'
+import { SentryEventItemSchema, TransactionItemSchema } from '@flare/shared-types'
 import { parseSentryAuthHeader } from '../auth/parse-sentry-auth-header'
 import { resolveProjectByPublicKey } from '../auth/resolve-project'
 import { checkRateLimit } from '../rate-limit/check-rate-limit'
@@ -39,14 +39,33 @@ export function registerEnvelopeRoute(app: FastifyInstance): void {
 
     let lastEventId: string | undefined
     for (const item of envelope.items) {
-      if (item.header.type !== 'event') continue
-      const parsed = SentryEventItemSchema.parse(JSON.parse(item.payload.toString('utf8')))
-      lastEventId = parsed.event_id
-      await producer.send(
-        'ingest.errors',
-        `${project.id}:${parsed.event_id}`,
-        JSON.stringify({ projectId: project.id, event: parsed })
-      )
+      if (item.header.type === 'event') {
+        const parsed = SentryEventItemSchema.parse(JSON.parse(item.payload.toString('utf8')))
+        lastEventId = parsed.event_id
+        await producer.send(
+          'ingest.errors',
+          `${project.id}:${parsed.event_id}`,
+          JSON.stringify({ projectId: project.id, event: parsed })
+        )
+      } else if (item.header.type === 'transaction') {
+        const parsed = TransactionItemSchema.parse(JSON.parse(item.payload.toString('utf8')))
+        lastEventId = parsed.event_id
+        await producer.send(
+          'ingest.transactions',
+          `${project.id}:${parsed.event_id}`,
+          JSON.stringify({ projectId: project.id, event: parsed })
+        )
+      } else if (item.header.type === 'replay_event' || item.header.type === 'replay_recording') {
+        await producer.send(
+          'ingest.replays',
+          `${project.id}:${item.header.type}`,
+          JSON.stringify({
+            projectId: project.id,
+            itemType: item.header.type,
+            payload: item.payload.toString('base64'),
+          })
+        )
+      }
     }
 
     return reply.code(200).send({ id: lastEventId ?? envelope.header.event_id })
