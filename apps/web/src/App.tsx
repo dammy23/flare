@@ -5,6 +5,7 @@ import { IssueListPage } from './pages/IssueListPage'
 import { ReplayDetailPage } from './pages/ReplayDetailPage'
 import { ReplayListPage } from './pages/ReplayListPage'
 import { TraceDetailPage } from './pages/TraceDetailPage'
+import { FlowDetailPage } from './pages/FlowDetailPage'
 
 const PROJECT_ID = import.meta.env.VITE_PROJECT_ID ?? ''
 
@@ -26,6 +27,7 @@ export function App() {
       <Route path="/projects/:projectId/dashboard" element={<DashboardRoute />} />
       <Route path="/projects/:projectId/replays" element={<ReplayListRoute />} />
       <Route path="/traces/:traceId" element={<TraceDetailPage />} />
+      <Route path="/flows/:flowTraceId" element={<FlowDetailPage />} />
       <Route path="/replays/:replayId" element={<ReplayDetailPage />} />
     </Routes>
   )

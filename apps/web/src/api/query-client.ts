@@ -77,3 +77,24 @@ export async function fetchReplay(replayId: string): Promise<{ id: string; sessi
   const response = await fetch(`${QUERY_API_BASE_URL}/api/v1/replays/${replayId}`)
   return response.json()
 }
+
+export interface FlowTraceDto {
+  id: string
+  status: string
+  current_stage: string | null
+  started_at: string
+  last_activity_at: string
+}
+
+export interface FlowStepDto {
+  id: string
+  stage_name: string
+  system: string
+  occurred_at: string
+  status: string
+}
+
+export async function fetchFlow(flowTraceId: string): Promise<{ trace: FlowTraceDto; steps: FlowStepDto[] }> {
+  const response = await fetch(`${QUERY_API_BASE_URL}/api/v1/flows/${flowTraceId}`)
+  return response.json()
+}
