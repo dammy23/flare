@@ -79,6 +79,7 @@ describe('FlowDetailPage', () => {
     await waitFor(() => expect(screen.getByText('view trace')).toBeInTheDocument())
     expect(screen.getByText('view trace').closest('a')).toHaveAttribute('href', '/traces/trace-42?projectId=proj-1')
     expect(screen.getByText('view issue').closest('a')).toHaveAttribute('href', '/issues/issue-7?projectId=proj-1')
-    expect(screen.getByText('Skipped stages: shipped')).toBeInTheDocument()
+    expect(screen.getByText('Skipped')).toBeInTheDocument()
+    expect(screen.getByText('shipped')).toBeInTheDocument()
   })
 })

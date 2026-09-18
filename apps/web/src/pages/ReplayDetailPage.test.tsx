@@ -28,8 +28,9 @@ describe('ReplayDetailPage', () => {
         </Routes>
       </MemoryRouter>
     )
-    await waitFor(() => expect(screen.getByText('Segment 0')).toBeInTheDocument())
-    expect(screen.getByRole('link', { name: 'Segment 0' })).toHaveAttribute(
+    await waitFor(() => expect(screen.getByText('#0')).toBeInTheDocument())
+    expect(screen.getByText('1.0 KB')).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Download' })).toHaveAttribute(
       'href',
       'http://minio.local/replays/replay-1/0.bin?sig=x'
     )

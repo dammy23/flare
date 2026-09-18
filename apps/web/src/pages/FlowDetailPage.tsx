@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams, useSearchParams } from 'react-router-dom'
 import { fetchFlow, type FlowDeviationsDto, type FlowStepDto, type FlowTraceDto } from '../api/query-client'
+import { Card } from '../components/Card'
+import { Badge, type BadgeVariant } from '../components/Badge'
 
 function formatGap(ms: number): string {
   if (ms < 1000) return `${ms}ms`
@@ -10,6 +12,19 @@ function formatGap(ms: number): string {
   if (minutes < 60) return `${minutes.toFixed(1)}m`
   const hours = minutes / 60
   return `${hours.toFixed(1)}h`
+}
+
+function traceStatusVariant(status: string): BadgeVariant {
+  switch (status) {
+    case 'stalled':
+      return 'warning'
+    case 'completed':
+      return 'success'
+    case 'abandoned':
+      return 'danger'
+    default:
+      return 'info'
+  }
 }
 
 export function FlowDetailPage() {
@@ -27,49 +42,64 @@ export function FlowDetailPage() {
   if (!data) return <p>Loading…</p>
 
   const { trace, steps, deviations } = data
+  const hasDeviations = deviations && (deviations.skippedStages.length > 0 || deviations.unexpectedStages.length > 0)
 
   return (
-    <div>
-      <h1>{trace.current_stage ?? trace.status}</h1>
-      <p>{`Status: ${trace.status}`}</p>
-      {deviations && (deviations.skippedStages.length > 0 || deviations.unexpectedStages.length > 0) && (
-        <div>
-          {deviations.skippedStages.length > 0 && <p>{`Skipped stages: ${deviations.skippedStages.join(', ')}`}</p>}
-          {deviations.unexpectedStages.length > 0 && (
-            <p>{`Unexpected stages: ${deviations.unexpectedStages.join(', ')}`}</p>
+    <div className="flare-stack">
+      <div>
+        <h1>{trace.current_stage ?? trace.status}</h1>
+        <Badge variant={traceStatusVariant(trace.status)}>{trace.status}</Badge>
+      </div>
+
+      {hasDeviations && (
+        <Card title="Deviations">
+          {deviations!.skippedStages.length > 0 && (
+            <p>
+              <Badge variant="warning">Skipped</Badge>
+              <span>{` ${deviations!.skippedStages.join(', ')}`}</span>
+            </p>
           )}
-        </div>
+          {deviations!.unexpectedStages.length > 0 && (
+            <p>
+              <Badge variant="info">Unexpected</Badge>
+              <span>{` ${deviations!.unexpectedStages.join(', ')}`}</span>
+            </p>
+          )}
+        </Card>
       )}
-      <ul>
-        {steps.map((step, i) => {
-          const gap = i > 0 ? new Date(step.occurred_at).getTime() - new Date(steps[i - 1].occurred_at).getTime() : null
-          return (
-            <li key={step.id}>
-              {gap !== null && <div>{`— ${formatGap(gap)} gap —`}</div>}
-              <span>{step.stage_name}</span>
-              <span>{` (${step.system})`}</span>
-              <span>{` — ${step.occurred_at}`}</span>
-              {step.status === 'error' && <span> [error]</span>}
-              {step.tech_trace_id && (
-                <span>
-                  {' '}
-                  <Link to={`/traces/${step.tech_trace_id}?projectId=${encodeURIComponent(trace.project_id)}`}>
-                    view trace
-                  </Link>
-                </span>
-              )}
-              {step.issue_id && (
-                <span>
-                  {' '}
-                  <Link to={`/issues/${step.issue_id}?projectId=${encodeURIComponent(trace.project_id)}`}>
-                    view issue
-                  </Link>
-                </span>
-              )}
-            </li>
-          )
-        })}
-      </ul>
+
+      <Card title="Timeline">
+        <ul className="flare-timeline">
+          {steps.map((step, i) => {
+            const gap = i > 0 ? new Date(step.occurred_at).getTime() - new Date(steps[i - 1].occurred_at).getTime() : null
+            return (
+              <li key={step.id} className="flare-timeline-step">
+                {gap !== null && <div className="flare-text-muted">{`— ${formatGap(gap)} gap —`}</div>}
+                <div className="flare-timeline-step__row">
+                  <span>
+                    <strong>{step.stage_name}</strong>
+                    <span className="flare-text-muted">{` (${step.system})`}</span>
+                    <span className="flare-text-muted">{` — ${step.occurred_at}`}</span>
+                    {step.status === 'error' && <Badge variant="danger">error</Badge>}
+                  </span>
+                  <span>
+                    {step.tech_trace_id && (
+                      <Link to={`/traces/${step.tech_trace_id}?projectId=${encodeURIComponent(trace.project_id)}`}>
+                        view trace
+                      </Link>
+                    )}
+                    {step.issue_id && (
+                      <Link to={`/issues/${step.issue_id}?projectId=${encodeURIComponent(trace.project_id)}`}>
+                        view issue
+                      </Link>
+                    )}
+                  </span>
+                </div>
+              </li>
+            )
+          })}
+        </ul>
+      </Card>
     </div>
   )
 }

@@ -183,6 +183,20 @@
   letter-spacing: 0.04em;
 }
 
+/* DurationBar */
+.flare-duration-bar-track {
+  background: var(--flare-surface-raised);
+  border-radius: 2px;
+  height: 6px;
+  width: 100px;
+}
+
+.flare-duration-bar {
+  background: var(--flare-accent);
+  height: 6px;
+  border-radius: 2px;
+}
+
 /* RankedList */
 .flare-ranked-list li {
   display: flex;
@@ -193,6 +207,23 @@
 
 .flare-ranked-list li:last-child {
   border-bottom: none;
+}
+
+/* Timeline (FlowDetailPage) */
+.flare-timeline li {
+  padding: var(--flare-space-2) 0;
+  border-bottom: 1px solid var(--flare-border);
+}
+
+.flare-timeline li:last-child {
+  border-bottom: none;
+}
+
+.flare-timeline-step__row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--flare-space-3);
 }
 
 /* EmptyState */

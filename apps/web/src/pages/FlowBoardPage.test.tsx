@@ -32,10 +32,11 @@ describe('FlowBoardPage', () => {
       </MemoryRouter>
     )
 
-    await waitFor(() => expect(screen.getByText('received')).toBeInTheDocument())
-    expect(screen.getByText('mastered')).toBeInTheDocument()
+    await waitFor(() => expect(screen.getByText('received (1)')).toBeInTheDocument())
+    expect(screen.getByText('mastered (1)')).toBeInTheDocument()
     expect(screen.getByText('flow-1')).toBeInTheDocument()
-    expect(screen.getByText('— stalled, last active 2026-09-18T10:00:00.000Z')).toBeInTheDocument()
+    expect(screen.getByText('stalled')).toBeInTheDocument()
+    expect(screen.getAllByText(/last active/).length).toBeGreaterThan(0)
     expect(screen.getByText('flow-1').closest('a')).toHaveAttribute('href', '/flows/flow-1?projectId=proj-1')
   })
 })

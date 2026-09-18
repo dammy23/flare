@@ -112,6 +112,26 @@
   margin-bottom: var(--flare-space-3);
 }
 
+.flare-board {
+  display: flex;
+  gap: var(--flare-space-4);
+  overflow-x: auto;
+  align-items: flex-start;
+}
+
+.flare-board__column {
+  flex: 0 0 280px;
+}
+
+.flare-board__card {
+  padding: var(--flare-space-2) 0;
+  border-bottom: 1px solid var(--flare-border);
+}
+
+.flare-board__card:last-child {
+  border-bottom: none;
+}
+
 .flare-stack {
   display: flex;
   flex-direction: column;

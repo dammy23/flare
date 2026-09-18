@@ -23,8 +23,20 @@ describe('FlowMapPage', () => {
       </MemoryRouter>
     )
 
-    await waitFor(() => expect(screen.getByText('received -> mastered')).toBeInTheDocument())
-    expect(screen.getByText(': 4 transitions')).toBeInTheDocument()
-    expect(screen.getByText(', avg 60000ms')).toBeInTheDocument()
+    await waitFor(() => expect(screen.getByText('received')).toBeInTheDocument())
+    expect(screen.getByText('mastered')).toBeInTheDocument()
+    expect(screen.getByText('4')).toBeInTheDocument()
+    expect(screen.getByText('1.0m')).toBeInTheDocument()
+  })
+
+  it('shows an empty state when there are no transitions', async () => {
+    server.use(http.get('http://localhost:3001/api/v1/flows/map', () => HttpResponse.json([])))
+
+    render(
+      <MemoryRouter>
+        <FlowMapPage projectId="proj-1" />
+      </MemoryRouter>
+    )
+    await waitFor(() => expect(screen.getByText('No transitions yet')).toBeInTheDocument())
   })
 })

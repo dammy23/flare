@@ -25,7 +25,20 @@ describe('ReplayListPage', () => {
       </MemoryRouter>
     )
     await waitFor(() => expect(screen.getByText('sess-1')).toBeInTheDocument())
-    expect(screen.getByText('— 3 segments, 1 errors')).toBeInTheDocument()
+    expect(screen.getByText('3')).toBeInTheDocument()
+    expect(screen.getByText('1')).toBeInTheDocument()
+    expect(screen.getByText('5.0s')).toBeInTheDocument()
     expect(screen.getByText('sess-1').closest('a')).toHaveAttribute('href', '/replays/replay-1?projectId=proj-1')
+  })
+
+  it('shows an empty state when there are no replays', async () => {
+    server.use(http.get('http://localhost:3001/api/v1/projects/proj-1/replays', () => HttpResponse.json([])))
+
+    render(
+      <MemoryRouter>
+        <ReplayListPage projectId="proj-1" />
+      </MemoryRouter>
+    )
+    await waitFor(() => expect(screen.getByText('No replays yet')).toBeInTheDocument())
   })
 })
