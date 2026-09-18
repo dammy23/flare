@@ -16,6 +16,9 @@ export interface Database {
   replay: ReplayTable
   replay_segment: ReplaySegmentTable
   raw_envelope: RawEnvelopeTable
+  flow_trace: FlowTraceTable
+  flow_step: FlowStepTable
+  flow_alias: FlowAliasTable
 }
 
 export interface ProjectTable {
@@ -172,4 +175,37 @@ export interface RawEnvelopeTable {
   event_id: string | null
   raw_bytes: Buffer
   received_at: Generated<Date>
+}
+
+export interface FlowTraceTable {
+  id: Generated<string>
+  project_id: string
+  status: Generated<string>
+  current_stage: string | null
+  started_at: Generated<Date>
+  last_activity_at: Generated<Date>
+  completed_at: Date | null
+}
+
+export interface FlowStepTable {
+  id: Generated<string>
+  flow_trace_id: string
+  stage_name: string
+  system: string
+  dedup_key: string
+  reported_ids: Generated<unknown>
+  tech_trace_id: string | null
+  issue_id: string | null
+  occurred_at: Date
+  received_at: Generated<Date>
+  status: Generated<string>
+}
+
+export interface FlowAliasTable {
+  id: Generated<string>
+  flow_trace_id: string
+  system: string
+  entity_id: string
+  first_seen: Generated<Date>
+  last_seen: Generated<Date>
 }
