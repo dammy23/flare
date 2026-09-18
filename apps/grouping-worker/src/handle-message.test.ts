@@ -129,11 +129,72 @@ describe('handleErrorMessage', () => {
     await handleErrorMessage(db, redis, producer, message, {
       webhookUrl: 'https://hooks.slack.test/alert',
       frequencyThreshold: 100,
+      sendEmail: null,
     })
 
     expect(fetchMock).toHaveBeenCalledTimes(1)
     const [, options] = fetchMock.mock.calls[0]
     expect(JSON.parse(options.body).text).toContain('New issue')
+  })
+
+  it('sends an email alert for a brand-new issue when email is configured', async () => {
+    const project = await db
+      .insertInto('project')
+      .values({ name: 'Alert Email New Issue Test', slug: `alert-email-new-${Date.now()}`, public_key: `pk-alert-email-new-${Date.now()}` })
+      .returningAll()
+      .executeTakeFirstOrThrow()
+
+    const sendEmail = vi.fn().mockResolvedValue(undefined)
+
+    const message = {
+      projectId: project.id,
+      event: {
+        event_id: `evt-alert-email-new-${Date.now()}`,
+        environment: 'production',
+        exception: { values: [{ type: 'TypeError', value: 'email alert boom' }] },
+      },
+    }
+
+    await handleErrorMessage(db, redis, producer, message, {
+      webhookUrl: null,
+      frequencyThreshold: 100,
+      sendEmail,
+    })
+
+    expect(sendEmail).toHaveBeenCalledTimes(1)
+    const [subject, text] = sendEmail.mock.calls[0]
+    expect(subject).toBe('Flare: new issue')
+    expect(text).toContain('New issue')
+  })
+
+  it('fires both Slack and email when both are configured', async () => {
+    const project = await db
+      .insertInto('project')
+      .values({ name: 'Alert Both Channels Test', slug: `alert-both-${Date.now()}`, public_key: `pk-alert-both-${Date.now()}` })
+      .returningAll()
+      .executeTakeFirstOrThrow()
+
+    const fetchMock = vi.fn().mockResolvedValue({ ok: true })
+    vi.stubGlobal('fetch', fetchMock)
+    const sendEmail = vi.fn().mockResolvedValue(undefined)
+
+    await handleErrorMessage(
+      db,
+      redis,
+      producer,
+      {
+        projectId: project.id,
+        event: {
+          event_id: `evt-alert-both-${Date.now()}`,
+          environment: 'production',
+          exception: { values: [{ type: 'TypeError', value: 'both channels boom' }] },
+        },
+      },
+      { webhookUrl: 'https://hooks.slack.test/alert', frequencyThreshold: 100, sendEmail }
+    )
+
+    expect(fetchMock).toHaveBeenCalledTimes(1)
+    expect(sendEmail).toHaveBeenCalledTimes(1)
   })
 
   it('sends a Slack alert exactly once when times_seen crosses the configured threshold', async () => {
@@ -146,7 +207,7 @@ describe('handleErrorMessage', () => {
     const fetchMock = vi.fn().mockResolvedValue({ ok: true })
     vi.stubGlobal('fetch', fetchMock)
 
-    const alerting = { webhookUrl: 'https://hooks.slack.test/alert', frequencyThreshold: 2 }
+    const alerting = { webhookUrl: 'https://hooks.slack.test/alert', frequencyThreshold: 2, sendEmail: null }
     const fingerprint = `evt-alert-threshold-${Date.now()}`
     const makeMessage = (n: number) => ({
       projectId: project.id,

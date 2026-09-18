@@ -16,9 +16,22 @@ interface IngestErrorMessage {
 export interface AlertingConfig {
   webhookUrl: string | null
   frequencyThreshold: number
+  // A plain function rather than an EmailAlertConfig/Transporter, so this
+  // module stays decoupled from nodemailer specifics -- main.ts owns
+  // constructing the transport, same division of responsibility as
+  // `producer`/`db`/`redis` being pre-built and injected rather than
+  // configured from env vars in here.
+  sendEmail: ((subject: string, text: string) => Promise<void>) | null
 }
 
-const DEFAULT_ALERTING: AlertingConfig = { webhookUrl: null, frequencyThreshold: 100 }
+const DEFAULT_ALERTING: AlertingConfig = { webhookUrl: null, frequencyThreshold: 100, sendEmail: null }
+
+async function fireAlert(alerting: AlertingConfig, subject: string, text: string): Promise<void> {
+  await Promise.all([
+    alerting.webhookUrl ? sendSlackWebhook(alerting.webhookUrl, text) : null,
+    alerting.sendEmail ? alerting.sendEmail(subject, text) : null,
+  ])
+}
 
 export async function handleErrorMessage(
   db: Kysely<Database>,
@@ -53,14 +66,13 @@ export async function handleErrorMessage(
     )
   }
 
-  if (alerting.webhookUrl) {
-    if (result.created) {
-      await sendSlackWebhook(alerting.webhookUrl, `:rotating_light: New issue: *${result.title}*`)
-    } else if (result.timesSeen === alerting.frequencyThreshold) {
-      await sendSlackWebhook(
-        alerting.webhookUrl,
-        `:chart_with_upwards_trend: Issue *${result.title}* has now occurred ${result.timesSeen} times`
-      )
-    }
+  if (result.created) {
+    await fireAlert(alerting, 'Flare: new issue', `New issue: ${result.title}`)
+  } else if (result.timesSeen === alerting.frequencyThreshold) {
+    await fireAlert(
+      alerting,
+      'Flare: issue threshold reached',
+      `Issue "${result.title}" has now occurred ${result.timesSeen} times`
+    )
   }
 }
