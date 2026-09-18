@@ -24,7 +24,7 @@ describe('GET /api/v1/projects/:projectId/dashboard', () => {
     expect(response.statusCode).toBe(200)
     const body = response.json()
     expect(body.projectId).toBe(project.id)
-    expect(body.widgets).toHaveLength(4)
+    expect(body.widgets).toHaveLength(5)
   })
 
   it('returns 404 when the project has no dashboard', async () => {

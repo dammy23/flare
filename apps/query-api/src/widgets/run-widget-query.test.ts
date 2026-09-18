@@ -81,4 +81,36 @@ describe('runWidgetQuery', () => {
     const row = result.find((r) => r.environmentName === environment.name)
     expect(row?.count).toBeGreaterThan(0)
   })
+
+  it('transaction_latency returns rollup rows for the configured transaction name', async () => {
+    const { project, environment } = await seedProjectWithData()
+    await db
+      .insertInto('transaction_latency_rollup')
+      .values({
+        project_id: project.id,
+        environment_id: environment.id,
+        transaction_name: 'GET /api/rollup-widget-test',
+        hour_bucket: new Date(),
+        p50_ms: 100,
+        p95_ms: 200,
+        p99_ms: 300,
+        count: 5,
+      })
+      .execute()
+
+    const result = (await runWidgetQuery(
+      db,
+      'transaction_latency',
+      { transactionName: 'GET /api/rollup-widget-test', hours: 24 },
+      { projectId: project.id, environmentName: null }
+    )) as Array<{ p50_ms: number }>
+    expect(result).toHaveLength(1)
+    expect(result[0].p50_ms).toBe(100)
+  })
+
+  it('transaction_latency returns an empty array for an unconfigured widget (empty transactionName)', async () => {
+    const { project } = await seedProjectWithData()
+    const result = await runWidgetQuery(db, 'transaction_latency', {}, { projectId: project.id, environmentName: null })
+    expect(result).toEqual([])
+  })
 })

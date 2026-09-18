@@ -2,8 +2,8 @@ import { describe, expect, it } from 'vitest'
 import { validateWidgetConfig, WidgetLayoutSchema, WidgetTypeSchema } from './widgets'
 
 describe('WidgetTypeSchema', () => {
-  it('accepts the four starter catalog types', () => {
-    for (const type of ['issues_over_time', 'top_issues', 'new_issues', 'events_by_environment']) {
+  it('accepts the starter catalog types', () => {
+    for (const type of ['issues_over_time', 'top_issues', 'new_issues', 'events_by_environment', 'transaction_latency']) {
       expect(WidgetTypeSchema.parse(type)).toBe(type)
     }
   })
@@ -25,6 +25,10 @@ describe('validateWidgetConfig', () => {
 
   it('strips unknown keys for its type', () => {
     expect(validateWidgetConfig('new_issues', { limit: 10 })).toEqual({ windowDays: 14 })
+  })
+
+  it('defaults transaction_latency to an empty transactionName (unconfigured widget) and 24 hours', () => {
+    expect(validateWidgetConfig('transaction_latency', {})).toEqual({ transactionName: '', hours: 24 })
   })
 })
 

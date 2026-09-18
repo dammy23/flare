@@ -12,6 +12,10 @@ function daysAgo(days: number) {
   return sql<Date>`now() - (${days} * interval '1 day')`
 }
 
+function hoursAgo(hours: number) {
+  return sql<Date>`now() - (${hours} * interval '1 hour')`
+}
+
 async function issuesOverTime(db: Kysely<Database>, config: WidgetConfigFor<'issues_over_time'>, scope: WidgetScope) {
   let query = db
     .selectFrom('event')
@@ -81,6 +85,29 @@ async function eventsByEnvironment(
     .execute()
 }
 
+async function transactionLatency(
+  db: Kysely<Database>,
+  config: WidgetConfigFor<'transaction_latency'>,
+  scope: WidgetScope
+) {
+  if (config.transactionName === '') return []
+
+  let query = db
+    .selectFrom('transaction_latency_rollup')
+    .selectAll('transaction_latency_rollup')
+    .where('transaction_latency_rollup.project_id', '=', scope.projectId)
+    .where('transaction_latency_rollup.transaction_name', '=', config.transactionName)
+    .where('transaction_latency_rollup.hour_bucket', '>=', hoursAgo(config.hours))
+
+  if (scope.environmentName) {
+    query = query
+      .innerJoin('environment', 'environment.id', 'transaction_latency_rollup.environment_id')
+      .where('environment.name', '=', scope.environmentName)
+  }
+
+  return query.orderBy('transaction_latency_rollup.hour_bucket', 'asc').execute()
+}
+
 export async function runWidgetQuery(
   db: Kysely<Database>,
   type: WidgetType,
@@ -96,5 +123,7 @@ export async function runWidgetQuery(
       return newIssues(db, validateWidgetConfig('new_issues', rawConfig), scope)
     case 'events_by_environment':
       return eventsByEnvironment(db, validateWidgetConfig('events_by_environment', rawConfig), scope)
+    case 'transaction_latency':
+      return transactionLatency(db, validateWidgetConfig('transaction_latency', rawConfig), scope)
   }
 }

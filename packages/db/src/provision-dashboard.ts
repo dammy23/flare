@@ -6,6 +6,7 @@ const STARTER_WIDGETS: Array<{ widget_type: string; title: string; layout: { x: 
   { widget_type: 'top_issues', title: 'Top Issues', layout: { x: 6, y: 0, w: 6, h: 4 } },
   { widget_type: 'new_issues', title: 'New Issues', layout: { x: 0, y: 4, w: 6, h: 4 } },
   { widget_type: 'events_by_environment', title: 'Events by Environment', layout: { x: 6, y: 4, w: 6, h: 4 } },
+  { widget_type: 'transaction_latency', title: 'Transaction Latency', layout: { x: 0, y: 8, w: 12, h: 4 } },
 ]
 
 export async function provisionDefaultDashboard(db: Kysely<Database>, projectId: string): Promise<string> {
