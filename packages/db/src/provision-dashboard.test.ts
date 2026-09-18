@@ -21,7 +21,7 @@ describe('provisionDefaultDashboard', () => {
 
     const widgets = await db.selectFrom('dashboard_widget').selectAll().where('dashboard_id', '=', dashboardId).execute()
     expect(widgets.map((w) => w.widget_type).sort()).toEqual(
-      ['events_by_environment', 'issues_over_time', 'new_issues', 'top_issues', 'transaction_latency'].sort()
+      ['events_by_environment', 'issues_over_time', 'new_issues', 'top_issues', 'transaction_latency', 'replay_count'].sort()
     )
   })
 

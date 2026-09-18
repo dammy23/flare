@@ -3,7 +3,7 @@ import { validateWidgetConfig, WidgetLayoutSchema, WidgetTypeSchema } from './wi
 
 describe('WidgetTypeSchema', () => {
   it('accepts the starter catalog types', () => {
-    for (const type of ['issues_over_time', 'top_issues', 'new_issues', 'events_by_environment', 'transaction_latency']) {
+    for (const type of ['issues_over_time', 'top_issues', 'new_issues', 'events_by_environment', 'transaction_latency', 'replay_count']) {
       expect(WidgetTypeSchema.parse(type)).toBe(type)
     }
   })
@@ -29,6 +29,10 @@ describe('validateWidgetConfig', () => {
 
   it('defaults transaction_latency to an empty transactionName (unconfigured widget) and 24 hours', () => {
     expect(validateWidgetConfig('transaction_latency', {})).toEqual({ transactionName: '', hours: 24 })
+  })
+
+  it('defaults replay_count to a 14-day window', () => {
+    expect(validateWidgetConfig('replay_count', {})).toEqual({ windowDays: 14 })
   })
 })
 

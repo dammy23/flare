@@ -108,6 +108,22 @@ async function transactionLatency(
   return query.orderBy('transaction_latency_rollup.hour_bucket', 'asc').execute()
 }
 
+async function replayCount(db: Kysely<Database>, config: WidgetConfigFor<'replay_count'>, scope: WidgetScope) {
+  let query = db
+    .selectFrom('replay')
+    .select(sql<number>`count(*)`.as('count'))
+    .where('replay.project_id', '=', scope.projectId)
+    .where('replay.started_at', '>=', daysAgo(config.windowDays))
+
+  if (scope.environmentName) {
+    query = query
+      .innerJoin('environment', 'environment.id', 'replay.environment_id')
+      .where('environment.name', '=', scope.environmentName)
+  }
+
+  return query.executeTakeFirstOrThrow()
+}
+
 export async function runWidgetQuery(
   db: Kysely<Database>,
   type: WidgetType,
@@ -125,5 +141,7 @@ export async function runWidgetQuery(
       return eventsByEnvironment(db, validateWidgetConfig('events_by_environment', rawConfig), scope)
     case 'transaction_latency':
       return transactionLatency(db, validateWidgetConfig('transaction_latency', rawConfig), scope)
+    case 'replay_count':
+      return replayCount(db, validateWidgetConfig('replay_count', rawConfig), scope)
   }
 }

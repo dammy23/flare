@@ -6,6 +6,7 @@ export const WidgetTypeSchema = z.enum([
   'new_issues',
   'events_by_environment',
   'transaction_latency',
+  'replay_count',
 ])
 export type WidgetType = z.infer<typeof WidgetTypeSchema>
 
@@ -26,6 +27,9 @@ export const TransactionLatencyConfigSchema = z.object({
   transactionName: z.string().default(''),
   hours: z.number().int().positive().max(168).default(24),
 })
+export const ReplayCountConfigSchema = z.object({
+  windowDays: z.number().int().positive().max(90).default(14),
+})
 
 export const WidgetConfigSchemaByType = {
   issues_over_time: IssuesOverTimeConfigSchema,
@@ -33,6 +37,7 @@ export const WidgetConfigSchemaByType = {
   new_issues: NewIssuesConfigSchema,
   events_by_environment: EventsByEnvironmentConfigSchema,
   transaction_latency: TransactionLatencyConfigSchema,
+  replay_count: ReplayCountConfigSchema,
 } as const
 
 export type WidgetConfigFor<T extends WidgetType> = z.infer<(typeof WidgetConfigSchemaByType)[T]>

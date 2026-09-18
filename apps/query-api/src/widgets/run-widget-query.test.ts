@@ -113,4 +113,20 @@ describe('runWidgetQuery', () => {
     const result = await runWidgetQuery(db, 'transaction_latency', {}, { projectId: project.id, environmentName: null })
     expect(result).toEqual([])
   })
+
+  it('replay_count returns the count of replays in the window', async () => {
+    const { project, environment } = await seedProjectWithData()
+    await db
+      .insertInto('replay')
+      .values({ project_id: project.id, environment_id: environment.id, session_id: `sess-widget-${Date.now()}` })
+      .execute()
+
+    const result = (await runWidgetQuery(
+      db,
+      'replay_count',
+      { windowDays: 14 },
+      { projectId: project.id, environmentName: null }
+    )) as { count: number }
+    expect(Number(result.count)).toBeGreaterThan(0)
+  })
 })

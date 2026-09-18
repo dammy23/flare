@@ -30,7 +30,7 @@ describe('POST /api/v1/projects', () => {
     expect(dashboard.id).toBe(body.dashboardId)
 
     const widgets = await db.selectFrom('dashboard_widget').selectAll().where('dashboard_id', '=', dashboard.id).execute()
-    expect(widgets).toHaveLength(5)
+    expect(widgets).toHaveLength(6)
   })
 
   it('rejects a duplicate slug', async () => {
