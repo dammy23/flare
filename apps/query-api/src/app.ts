@@ -8,6 +8,7 @@ import { registerProjectRoutes } from './routes/projects'
 import { registerDashboardRoutes } from './routes/dashboard'
 import { registerWidgetRoutes } from './routes/widgets'
 import { registerWidgetDataRoute } from './routes/widget-data'
+import { registerTraceRoutes } from './routes/traces'
 
 export interface AppDeps {
   db: Kysely<Database>
@@ -31,6 +32,7 @@ export function buildApp(deps: AppDeps): FastifyInstance {
   registerDashboardRoutes(app)
   registerWidgetRoutes(app)
   registerWidgetDataRoute(app)
+  registerTraceRoutes(app)
 
   return app
 }
