@@ -5,6 +5,7 @@ import { buildApp } from './app'
 
 const db = createDb(process.env.DATABASE_URL ?? 'postgres://flare:flare@localhost:5432/flare')
 const redis = new Redis(process.env.REDIS_URL ?? 'redis://localhost:6379')
+const queueConnection = new Redis(process.env.REDIS_URL ?? 'redis://localhost:6379', { maxRetriesPerRequest: null })
 const storage = createStorageClient({
   endpoint: process.env.S3_ENDPOINT ?? 'http://localhost:9000',
   region: process.env.S3_REGION ?? 'us-east-1',
@@ -12,7 +13,7 @@ const storage = createStorageClient({
   secretAccessKey: process.env.S3_SECRET_KEY ?? 'flare12345',
   bucket: process.env.S3_BUCKET ?? 'flare-source-maps',
 })
-const app = buildApp({ db, redis, storage })
+const app = buildApp({ db, redis, storage, queueConnection })
 
 app.listen({ port: Number(process.env.PORT ?? 3001), host: '0.0.0.0' }).catch((error) => {
   app.log.error(error)

@@ -1,12 +1,18 @@
 import { createDb, provisionDefaultDashboard } from '@flare/db'
+import Redis from 'ioredis'
 import { afterAll, describe, expect, it } from 'vitest'
 import { buildApp } from '../app'
 
 const db = createDb(process.env.DATABASE_URL ?? 'postgres://flare:flare@localhost:5432/flare')
-const app = buildApp({ db, redis: {} as never, storage: {} as never })
+const queueConnection = new Redis(process.env.REDIS_URL ?? 'redis://localhost:6379', {
+  maxRetriesPerRequest: null,
+  lazyConnect: true,
+})
+const app = buildApp({ db, redis: {} as never, storage: {} as never, queueConnection })
 
 afterAll(async () => {
   await db.destroy()
+  queueConnection.disconnect()
   await app.close()
 })
 

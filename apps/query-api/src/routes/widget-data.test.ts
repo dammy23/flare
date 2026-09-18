@@ -5,11 +5,16 @@ import { buildApp } from '../app'
 
 const db = createDb(process.env.DATABASE_URL ?? 'postgres://flare:flare@localhost:5432/flare')
 const redis = new Redis(process.env.REDIS_URL ?? 'redis://localhost:6379')
-const app = buildApp({ db, redis, storage: {} as never })
+const queueConnection = new Redis(process.env.REDIS_URL ?? 'redis://localhost:6379', {
+  maxRetriesPerRequest: null,
+  lazyConnect: true,
+})
+const app = buildApp({ db, redis, storage: {} as never, queueConnection })
 
 afterAll(async () => {
   await db.destroy()
   redis.disconnect()
+  queueConnection.disconnect()
   await app.close()
 })
 

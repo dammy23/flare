@@ -10,10 +10,13 @@
     "start": "node dist/server.js"
   },
   "dependencies": {
+    "@bull-board/api": "^5.21.0",
+    "@bull-board/fastify": "^5.21.0",
     "@fastify/cors": "^9.0.0",
     "@flare/db": "workspace:*",
     "@flare/shared-types": "workspace:*",
     "@flare/storage": "workspace:*",
+    "bullmq": "^5.28.0",
     "fastify": "^4.28.0",
     "ioredis": "^5.4.0",
     "kysely": "^0.27.0"

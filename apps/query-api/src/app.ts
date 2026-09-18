@@ -11,11 +11,13 @@ import { registerWidgetRoutes } from './routes/widgets'
 import { registerWidgetDataRoute } from './routes/widget-data'
 import { registerTraceRoutes } from './routes/traces'
 import { registerReplayRoutes } from './routes/replays'
+import { registerQueueBoard } from './queue-board'
 
 export interface AppDeps {
   db: Kysely<Database>
   redis: Redis
   storage: StorageClient
+  queueConnection: Redis
 }
 
 declare module 'fastify' {
@@ -37,6 +39,7 @@ export function buildApp(deps: AppDeps): FastifyInstance {
   registerWidgetDataRoute(app)
   registerTraceRoutes(app)
   registerReplayRoutes(app)
+  registerQueueBoard(app, deps.queueConnection)
 
   return app
 }

@@ -13,11 +13,16 @@ const storage = createStorageClient({
   secretAccessKey: process.env.S3_SECRET_KEY ?? 'flare12345',
   bucket: process.env.S3_BUCKET ?? 'flare-source-maps',
 })
-const app = buildApp({ db, redis, storage })
+const queueConnection = new Redis(process.env.REDIS_URL ?? 'redis://localhost:6379', {
+  maxRetriesPerRequest: null,
+  lazyConnect: true,
+})
+const app = buildApp({ db, redis, storage, queueConnection })
 
 afterAll(async () => {
   await db.destroy()
   redis.disconnect()
+  queueConnection.disconnect()
   await app.close()
 })
 
