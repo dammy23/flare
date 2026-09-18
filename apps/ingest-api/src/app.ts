@@ -4,14 +4,14 @@ import type { Kysely } from 'kysely'
 import type { Database } from '@flare/db'
 import type { Redis } from 'ioredis'
 import type { StorageClient } from '@flare/storage'
-import type { EventProducer } from './kafka/producer'
+import type { QueueProducer } from './queue/producer'
 import { registerEnvelopeRoute } from './routes/envelope'
 import { registerReleaseRoutes } from './routes/releases'
 
 export interface AppDeps {
   db: Kysely<Database>
   redis: Redis
-  producer: EventProducer
+  producer: QueueProducer
   storage: StorageClient
 }
 

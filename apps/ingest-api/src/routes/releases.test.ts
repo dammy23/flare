@@ -4,11 +4,12 @@ import Redis from 'ioredis'
 import FormData from 'form-data'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { buildApp } from '../app'
-import { createKafkaProducer } from '../kafka/producer'
+import { createQueueProducer } from '../queue/producer'
 
 const db = createDb(process.env.DATABASE_URL ?? 'postgres://flare:flare@localhost:5432/flare')
 const redis = new Redis(process.env.REDIS_URL ?? 'redis://localhost:6379')
-const producer = createKafkaProducer([process.env.KAFKA_BROKERS ?? 'localhost:9092'])
+const queueConnection = new Redis(process.env.REDIS_URL ?? 'redis://localhost:6379', { maxRetriesPerRequest: null })
+const producer = createQueueProducer(queueConnection)
 const storage = createStorageClient({
   endpoint: process.env.S3_ENDPOINT ?? 'http://localhost:9000',
   region: 'us-east-1',
@@ -21,7 +22,6 @@ const app = buildApp({ db, redis, producer, storage })
 let publicKey: string
 
 beforeAll(async () => {
-  await producer.connect()
   publicKey = `pk-releases-${Date.now()}`
   await db
     .insertInto('project')
@@ -30,9 +30,10 @@ beforeAll(async () => {
 })
 
 afterAll(async () => {
-  await producer.disconnect()
+  await producer.close()
   await db.destroy()
   redis.disconnect()
+  queueConnection.disconnect()
   await app.close()
 })
 

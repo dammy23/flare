@@ -1,9 +1,12 @@
 import type { FastifyInstance } from 'fastify'
+import { archiveRawEnvelope } from '@flare/db'
 import { SentryEventItemSchema, TransactionItemSchema } from '@flare/shared-types'
 import { parseSentryAuthHeader } from '../auth/parse-sentry-auth-header'
 import { resolveProjectByPublicKey } from '../auth/resolve-project'
 import { checkRateLimit } from '../rate-limit/check-rate-limit'
 import { parseEnvelope } from '../envelope/parse-envelope'
+
+const RETRY_OPTS = { attempts: 5, backoff: { type: 'exponential' as const, delay: 1000 } }
 
 export function registerEnvelopeRoute(app: FastifyInstance): void {
   app.post<{ Params: { projectId: string } }>('/api/:projectId/envelope/', async (request, reply) => {
@@ -37,6 +40,18 @@ export function registerEnvelopeRoute(app: FastifyInstance): void {
     const raw = request.body as Buffer
     const envelope = parseEnvelope(raw)
 
+    // Durable archive of the wire bytes, before any queue interaction --
+    // this is what makes reprocessing possible later regardless of what
+    // happens downstream. Deliberately unguarded: if this throws (e.g.
+    // Postgres unreachable), the request fails with a 500 rather than
+    // silently proceeding without the durability guarantee this exists
+    // for.
+    await archiveRawEnvelope(db, {
+      projectId: project.id,
+      eventId: envelope.header.event_id ?? null,
+      rawBytes: raw,
+    })
+
     let lastEventId: string | undefined
     for (const item of envelope.items) {
       if (item.header.type === 'event') {
@@ -44,26 +59,25 @@ export function registerEnvelopeRoute(app: FastifyInstance): void {
         lastEventId = parsed.event_id
         await producer.send(
           'ingest.errors',
-          `${project.id}:${parsed.event_id}`,
-          JSON.stringify({ projectId: project.id, event: parsed })
+          'error',
+          { projectId: project.id, event: parsed },
+          { jobId: `${project.id}:${parsed.event_id}`, ...RETRY_OPTS }
         )
       } else if (item.header.type === 'transaction') {
         const parsed = TransactionItemSchema.parse(JSON.parse(item.payload.toString('utf8')))
         lastEventId = parsed.event_id
         await producer.send(
           'ingest.transactions',
-          `${project.id}:${parsed.event_id}`,
-          JSON.stringify({ projectId: project.id, event: parsed })
+          'transaction',
+          { projectId: project.id, event: parsed },
+          { jobId: `${project.id}:${parsed.event_id}`, ...RETRY_OPTS }
         )
       } else if (item.header.type === 'replay_event' || item.header.type === 'replay_recording') {
         await producer.send(
           'ingest.replays',
-          `${project.id}:${item.header.type}`,
-          JSON.stringify({
-            projectId: project.id,
-            itemType: item.header.type,
-            payload: item.payload.toString('base64'),
-          })
+          'replay',
+          { projectId: project.id, itemType: item.header.type, payload: item.payload.toString('base64') },
+          RETRY_OPTS
         )
       }
     }
