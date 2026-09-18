@@ -7,6 +7,8 @@ export interface UpsertResult {
   issueId: string
   eventId: string
   created: boolean
+  title: string
+  timesSeen: number
 }
 
 function titleFrom(event: SentryEventItem): string {
@@ -46,7 +48,7 @@ export async function upsertIssueAndEvent(
           .updateTable('issue')
           .set({ last_seen: new Date(), times_seen: sql`times_seen + 1` })
           .where('id', '=', existingIssue.id)
-          .returning('id')
+          .returning(['id', 'title', 'times_seen'])
           .executeTakeFirstOrThrow()
       : await trx
           .insertInto('issue')
@@ -57,7 +59,7 @@ export async function upsertIssueAndEvent(
             culprit: culpritFrom(event),
             grouping_raw_components: JSON.stringify(event.exception ?? {}),
           })
-          .returning('id')
+          .returning(['id', 'title', 'times_seen'])
           .executeTakeFirstOrThrow()
 
     await trx
@@ -105,6 +107,8 @@ export async function upsertIssueAndEvent(
       issueId: issue.id,
       eventId: eventRow.id,
       created: !existingIssue,
+      title: issue.title,
+      timesSeen: issue.times_seen,
     }
   })
 }

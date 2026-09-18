@@ -1,7 +1,7 @@
 import { createDb } from '@flare/db'
 import { Worker } from 'bullmq'
 import Redis from 'ioredis'
-import { afterAll, describe, expect, it } from 'vitest'
+import { afterAll, afterEach, describe, expect, it, vi } from 'vitest'
 import { handleErrorMessage } from './handle-message'
 import { createQueueProducer } from './queue/producer'
 
@@ -15,6 +15,10 @@ afterAll(async () => {
   await db.destroy()
   redis.disconnect()
   queueConnection.disconnect()
+})
+
+afterEach(() => {
+  vi.unstubAllGlobals()
 })
 
 describe('handleErrorMessage', () => {
@@ -101,5 +105,85 @@ describe('handleErrorMessage', () => {
       .executeTakeFirstOrThrow()
     expect(event.release_id).toBe(published.releaseId)
     expect(event.id).toBe(published.eventId)
+  })
+
+  it('sends a Slack alert for a brand-new issue when a webhook is configured', async () => {
+    const project = await db
+      .insertInto('project')
+      .values({ name: 'Alert New Issue Test', slug: `alert-new-${Date.now()}`, public_key: `pk-alert-new-${Date.now()}` })
+      .returningAll()
+      .executeTakeFirstOrThrow()
+
+    const fetchMock = vi.fn().mockResolvedValue({ ok: true })
+    vi.stubGlobal('fetch', fetchMock)
+
+    const message = {
+      projectId: project.id,
+      event: {
+        event_id: `evt-alert-new-${Date.now()}`,
+        environment: 'production',
+        exception: { values: [{ type: 'TypeError', value: 'alert boom' }] },
+      },
+    }
+
+    await handleErrorMessage(db, redis, producer, message, {
+      webhookUrl: 'https://hooks.slack.test/alert',
+      frequencyThreshold: 100,
+    })
+
+    expect(fetchMock).toHaveBeenCalledTimes(1)
+    const [, options] = fetchMock.mock.calls[0]
+    expect(JSON.parse(options.body).text).toContain('New issue')
+  })
+
+  it('sends a Slack alert exactly once when times_seen crosses the configured threshold', async () => {
+    const project = await db
+      .insertInto('project')
+      .values({ name: 'Alert Threshold Test', slug: `alert-threshold-${Date.now()}`, public_key: `pk-alert-threshold-${Date.now()}` })
+      .returningAll()
+      .executeTakeFirstOrThrow()
+
+    const fetchMock = vi.fn().mockResolvedValue({ ok: true })
+    vi.stubGlobal('fetch', fetchMock)
+
+    const alerting = { webhookUrl: 'https://hooks.slack.test/alert', frequencyThreshold: 2 }
+    const fingerprint = `evt-alert-threshold-${Date.now()}`
+    const makeMessage = (n: number) => ({
+      projectId: project.id,
+      event: {
+        event_id: `${fingerprint}-${n}`,
+        environment: 'production',
+        exception: { values: [{ type: 'TypeError', value: fingerprint }] },
+      },
+    })
+
+    await handleErrorMessage(db, redis, producer, makeMessage(1), alerting) // times_seen -> 1, below threshold
+    await handleErrorMessage(db, redis, producer, makeMessage(2), alerting) // times_seen -> 2, crosses threshold
+    await handleErrorMessage(db, redis, producer, makeMessage(3), alerting) // times_seen -> 3, past threshold, no re-fire
+
+    const thresholdCalls = fetchMock.mock.calls.filter(([, options]) => JSON.parse(options.body).text.includes('occurred'))
+    expect(thresholdCalls).toHaveLength(1)
+  })
+
+  it('never calls the webhook when none is configured', async () => {
+    const project = await db
+      .insertInto('project')
+      .values({ name: 'Alert Disabled Test', slug: `alert-disabled-${Date.now()}`, public_key: `pk-alert-disabled-${Date.now()}` })
+      .returningAll()
+      .executeTakeFirstOrThrow()
+
+    const fetchMock = vi.fn()
+    vi.stubGlobal('fetch', fetchMock)
+
+    await handleErrorMessage(db, redis, producer, {
+      projectId: project.id,
+      event: {
+        event_id: `evt-alert-disabled-${Date.now()}`,
+        environment: 'production',
+        exception: { values: [{ type: 'TypeError', value: 'no alert' }] },
+      },
+    })
+
+    expect(fetchMock).not.toHaveBeenCalled()
   })
 })

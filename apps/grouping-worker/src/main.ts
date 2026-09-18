@@ -8,5 +8,9 @@ const db = createDb(process.env.DATABASE_URL ?? 'postgres://flare:flare@localhos
 const redis = new Redis(process.env.REDIS_URL ?? 'redis://localhost:6379')
 const queueConnection = new Redis(process.env.REDIS_URL ?? 'redis://localhost:6379', { maxRetriesPerRequest: null })
 const producer = createQueueProducer(queueConnection)
+const alerting = {
+  webhookUrl: process.env.SLACK_WEBHOOK_URL ?? null,
+  frequencyThreshold: Number(process.env.ALERT_FREQUENCY_THRESHOLD ?? 100),
+}
 
-startConsumer(queueConnection, 'ingest.errors', (data) => handleErrorMessage(db, redis, producer, data))
+startConsumer(queueConnection, 'ingest.errors', (data) => handleErrorMessage(db, redis, producer, data, alerting))

@@ -34,6 +34,8 @@ describe('upsertIssueAndEvent', () => {
     })
 
     expect(result.created).toBe(true)
+    expect(result.timesSeen).toBe(1)
+    expect(result.title).toContain('Error')
 
     const issue = await db.selectFrom('issue').selectAll().where('id', '=', result.issueId).executeTakeFirstOrThrow()
     expect(issue.times_seen).toBe(1)
@@ -49,6 +51,7 @@ describe('upsertIssueAndEvent', () => {
 
     expect(second.issueId).toBe(first.issueId)
     expect(second.created).toBe(false)
+    expect(second.timesSeen).toBe(2)
 
     const issue = await db.selectFrom('issue').selectAll().where('id', '=', first.issueId).executeTakeFirstOrThrow()
     expect(issue.times_seen).toBe(2)
