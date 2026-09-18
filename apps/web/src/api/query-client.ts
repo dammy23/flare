@@ -32,3 +32,23 @@ export async function fetchWidgetData(widgetId: string, environment?: string): P
   const body = await response.json()
   return body.data
 }
+
+export interface TraceTransaction {
+  id: string
+  name: string
+  duration_ms: number
+  start_ts: string
+}
+
+export interface TraceSpan {
+  id: string
+  span_id: string
+  op: string | null
+  description: string | null
+  duration_ms: number
+}
+
+export async function fetchTrace(traceId: string): Promise<{ transactions: TraceTransaction[]; spans: TraceSpan[] }> {
+  const response = await fetch(`${QUERY_API_BASE_URL}/api/v1/traces/${traceId}`)
+  return response.json()
+}
