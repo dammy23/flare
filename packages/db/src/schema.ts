@@ -10,6 +10,9 @@ export interface Database {
   source_map_artifact: SourceMapArtifactTable
   dashboard: DashboardTable
   dashboard_widget: DashboardWidgetTable
+  transaction: TransactionTable
+  span: SpanTable
+  transaction_latency_rollup: TransactionLatencyRollupTable
 }
 
 export interface ProjectTable {
@@ -101,4 +104,41 @@ export interface DashboardWidgetTable {
   pinned_environment_name: string | null
   layout_updated_at: Generated<Date>
   config_updated_at: Generated<Date>
+}
+
+export interface TransactionTable {
+  id: Generated<string>
+  project_id: string
+  environment_id: string
+  release_id: string | null
+  trace_id: string
+  name: string
+  op: string | null
+  status: string | null
+  start_ts: Date
+  duration_ms: number
+  received_at: Generated<Date>
+}
+
+export interface SpanTable {
+  id: Generated<string>
+  transaction_id: string
+  trace_id: string
+  span_id: string
+  parent_span_id: string | null
+  op: string | null
+  description: string | null
+  start_ts: Date
+  duration_ms: number
+}
+
+export interface TransactionLatencyRollupTable {
+  project_id: string
+  environment_id: string
+  transaction_name: string
+  hour_bucket: Date
+  p50_ms: number
+  p95_ms: number
+  p99_ms: number
+  count: number
 }
