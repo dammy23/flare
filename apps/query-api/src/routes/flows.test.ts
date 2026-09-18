@@ -59,3 +59,78 @@ describe('GET /api/v1/flows/:flowTraceId', () => {
     expect(response.statusCode).toBe(404)
   })
 })
+
+describe('GET /api/v1/flows/board', () => {
+  it('groups in_progress traces by current_stage', async () => {
+    const project = await db
+      .insertInto('project')
+      .values({ name: 'Flow Board Test', slug: `flow-board-${Date.now()}`, public_key: `pk-flow-board-${Date.now()}` })
+      .returningAll()
+      .executeTakeFirstOrThrow()
+
+    const entityId = `WO-board-${Date.now()}`
+    const flowTraceId = await attachOrCreateFlowTrace(db, { projectId: project.id, reportedIds: [{ system: 'Dynamics', entityId }] })
+    await upsertFlowStep(db, {
+      flowTraceId,
+      stageName: 'received',
+      system: 'Dynamics',
+      dedupKey: `dedup-board-${Date.now()}`,
+      reportedIds: [],
+      techTraceId: null,
+      issueId: null,
+      occurredAt: new Date(),
+      status: 'ok',
+    })
+
+    const response = await app.inject({ method: 'GET', url: `/api/v1/flows/board?projectId=${project.id}` })
+
+    expect(response.statusCode).toBe(200)
+    const body = response.json() as Array<{ stage: string; traces: { id: string }[] }>
+    const receivedGroup = body.find((g) => g.stage === 'received')
+    expect(receivedGroup?.traces.some((t) => t.id === flowTraceId)).toBe(true)
+  })
+})
+
+describe('GET /api/v1/flows/map', () => {
+  it('returns an edge with a count and average duration for a two-step trace', async () => {
+    const project = await db
+      .insertInto('project')
+      .values({ name: 'Flow Map Test', slug: `flow-map-${Date.now()}`, public_key: `pk-flow-map-${Date.now()}` })
+      .returningAll()
+      .executeTakeFirstOrThrow()
+
+    const entityId = `WO-map-${Date.now()}`
+    const flowTraceId = await attachOrCreateFlowTrace(db, { projectId: project.id, reportedIds: [{ system: 'Dynamics', entityId }] })
+    const start = new Date()
+    await upsertFlowStep(db, {
+      flowTraceId,
+      stageName: 'received',
+      system: 'Dynamics',
+      dedupKey: `dedup-map-received-${Date.now()}`,
+      reportedIds: [],
+      techTraceId: null,
+      issueId: null,
+      occurredAt: start,
+      status: 'ok',
+    })
+    await upsertFlowStep(db, {
+      flowTraceId,
+      stageName: 'mastered',
+      system: 'MDM',
+      dedupKey: `dedup-map-mastered-${Date.now()}`,
+      reportedIds: [],
+      techTraceId: null,
+      issueId: null,
+      occurredAt: new Date(start.getTime() + 60_000),
+      status: 'ok',
+    })
+
+    const response = await app.inject({ method: 'GET', url: `/api/v1/flows/map?projectId=${project.id}` })
+
+    expect(response.statusCode).toBe(200)
+    const body = response.json() as Array<{ from: string; to: string; count: number; avgDurationMs: number | null }>
+    const edge = body.find((e) => e.from === 'received' && e.to === 'mastered')
+    expect(edge?.count).toBe(1)
+    expect(edge?.avgDurationMs).toBe(60000)
+  })
+})
