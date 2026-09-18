@@ -52,3 +52,28 @@ export async function fetchTrace(traceId: string): Promise<{ transactions: Trace
   const response = await fetch(`${QUERY_API_BASE_URL}/api/v1/traces/${traceId}`)
   return response.json()
 }
+
+export interface ReplaySummary {
+  id: string
+  session_id: string
+  duration_ms: number
+  segment_count: number
+  error_count: number
+  started_at: string
+}
+
+export interface ReplaySegmentDto {
+  sequence: number
+  sizeBytes: number
+  downloadUrl: string
+}
+
+export async function fetchReplays(projectId: string): Promise<ReplaySummary[]> {
+  const response = await fetch(`${QUERY_API_BASE_URL}/api/v1/projects/${projectId}/replays`)
+  return response.json()
+}
+
+export async function fetchReplay(replayId: string): Promise<{ id: string; session_id: string; segments: ReplaySegmentDto[] }> {
+  const response = await fetch(`${QUERY_API_BASE_URL}/api/v1/replays/${replayId}`)
+  return response.json()
+}
