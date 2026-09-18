@@ -15,6 +15,28 @@ importers:
         specifier: ^5.6.0
         version: 5.9.3
 
+  apps/flow-stitch-worker:
+    dependencies:
+      '@flare/db':
+        specifier: workspace:*
+        version: link:../../packages/db
+      '@flare/shared-types':
+        specifier: workspace:*
+        version: link:../../packages/shared-types
+      bullmq:
+        specifier: ^5.28.0
+        version: 5.81.5
+      ioredis:
+        specifier: ^5.4.0
+        version: 5.11.1
+      kysely:
+        specifier: ^0.27.0
+        version: 0.27.6
+    devDependencies:
+      vitest:
+        specifier: ^2.1.0
+        version: 2.1.9(@types/node@26.5.1)(jsdom@25.0.1)(msw@2.15.0(@types/node@26.5.1)(typescript@5.9.3))
+
   apps/grouping-worker:
     dependencies:
       '@flare/db':

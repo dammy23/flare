@@ -1,0 +1,22 @@
+{
+  "name": "@flare/flow-stitch-worker",
+  "version": "0.0.0",
+  "main": "dist/main.js",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "vitest run",
+    "lint": "echo 'no lint configured yet'",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "start": "node dist/main.js"
+  },
+  "dependencies": {
+    "@flare/db": "workspace:*",
+    "@flare/shared-types": "workspace:*",
+    "bullmq": "^5.28.0",
+    "ioredis": "^5.4.0",
+    "kysely": "^0.27.0"
+  },
+  "devDependencies": {
+    "vitest": "^2.1.0"
+  }
+}
