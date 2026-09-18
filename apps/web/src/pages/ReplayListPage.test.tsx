@@ -26,5 +26,6 @@ describe('ReplayListPage', () => {
     )
     await waitFor(() => expect(screen.getByText('sess-1')).toBeInTheDocument())
     expect(screen.getByText('— 3 segments, 1 errors')).toBeInTheDocument()
+    expect(screen.getByText('sess-1').closest('a')).toHaveAttribute('href', '/replays/replay-1?projectId=proj-1')
   })
 })

@@ -1,14 +1,16 @@
 import { useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useParams, useSearchParams } from 'react-router-dom'
 import { fetchTrace, type TraceSpan, type TraceTransaction } from '../api/query-client'
 
 export function TraceDetailPage() {
   const { traceId } = useParams<{ traceId: string }>()
+  const [searchParams] = useSearchParams()
+  const projectId = searchParams.get('projectId')
   const [data, setData] = useState<{ transactions: TraceTransaction[]; spans: TraceSpan[] } | null>(null)
 
   useEffect(() => {
-    if (traceId) fetchTrace(traceId).then(setData)
-  }, [traceId])
+    if (traceId && projectId) fetchTrace(traceId, projectId).then(setData)
+  }, [traceId, projectId])
 
   if (!data) return <p>Loading…</p>
 

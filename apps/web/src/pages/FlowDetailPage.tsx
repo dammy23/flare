@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useParams, useSearchParams } from 'react-router-dom'
 import { fetchFlow, type FlowDeviationsDto, type FlowStepDto, type FlowTraceDto } from '../api/query-client'
 
 function formatGap(ms: number): string {
@@ -14,13 +14,15 @@ function formatGap(ms: number): string {
 
 export function FlowDetailPage() {
   const { flowTraceId } = useParams<{ flowTraceId: string }>()
+  const [searchParams] = useSearchParams()
+  const projectId = searchParams.get('projectId')
   const [data, setData] = useState<{ trace: FlowTraceDto; steps: FlowStepDto[]; deviations: FlowDeviationsDto | null } | null>(
     null
   )
 
   useEffect(() => {
-    if (flowTraceId) fetchFlow(flowTraceId).then(setData)
-  }, [flowTraceId])
+    if (flowTraceId && projectId) fetchFlow(flowTraceId, projectId).then(setData)
+  }, [flowTraceId, projectId])
 
   if (!data) return <p>Loading…</p>
 
@@ -51,13 +53,17 @@ export function FlowDetailPage() {
               {step.tech_trace_id && (
                 <span>
                   {' '}
-                  <Link to={`/traces/${step.tech_trace_id}`}>view trace</Link>
+                  <Link to={`/traces/${step.tech_trace_id}?projectId=${encodeURIComponent(trace.project_id)}`}>
+                    view trace
+                  </Link>
                 </span>
               )}
               {step.issue_id && (
                 <span>
                   {' '}
-                  <Link to={`/issues/${step.issue_id}`}>view issue</Link>
+                  <Link to={`/issues/${step.issue_id}?projectId=${encodeURIComponent(trace.project_id)}`}>
+                    view issue
+                  </Link>
                 </span>
               )}
             </li>

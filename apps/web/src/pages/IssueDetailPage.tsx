@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useParams, useSearchParams } from 'react-router-dom'
 import type { IssueDetail } from '@flare/shared-types'
 import { fetchIssue } from '../api/query-client'
 
@@ -45,11 +45,13 @@ function ExceptionFrames({ exception }: { exception: unknown }) {
 
 export function IssueDetailPage() {
   const { issueId } = useParams<{ issueId: string }>()
+  const [searchParams] = useSearchParams()
+  const projectId = searchParams.get('projectId')
   const [issue, setIssue] = useState<IssueDetail | null>(null)
 
   useEffect(() => {
-    if (issueId) fetchIssue(issueId).then(setIssue)
-  }, [issueId])
+    if (issueId && projectId) fetchIssue(issueId, projectId).then(setIssue)
+  }, [issueId, projectId])
 
   if (!issue) return <p>Loading…</p>
 

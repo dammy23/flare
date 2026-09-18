@@ -10,6 +10,7 @@ const server = setupServer(
     HttpResponse.json({
       trace: {
         id: 'flow-1',
+        project_id: 'proj-1',
         status: 'in_progress',
         current_stage: 'mastered',
         started_at: '2026-09-18T12:00:00.000Z',
@@ -52,7 +53,7 @@ afterAll(() => server.close())
 describe('FlowDetailPage', () => {
   it('renders the current stage and each step with its system and gap', async () => {
     render(
-      <MemoryRouter initialEntries={['/flows/flow-1']}>
+      <MemoryRouter initialEntries={['/flows/flow-1?projectId=proj-1']}>
         <Routes>
           <Route path="/flows/:flowTraceId" element={<FlowDetailPage />} />
         </Routes>
@@ -68,7 +69,7 @@ describe('FlowDetailPage', () => {
 
   it('renders drill-down links for a step with tech_trace_id/issue_id, and skipped-stage deviations', async () => {
     render(
-      <MemoryRouter initialEntries={['/flows/flow-1']}>
+      <MemoryRouter initialEntries={['/flows/flow-1?projectId=proj-1']}>
         <Routes>
           <Route path="/flows/:flowTraceId" element={<FlowDetailPage />} />
         </Routes>
@@ -76,8 +77,8 @@ describe('FlowDetailPage', () => {
     )
 
     await waitFor(() => expect(screen.getByText('view trace')).toBeInTheDocument())
-    expect(screen.getByText('view trace').closest('a')).toHaveAttribute('href', '/traces/trace-42')
-    expect(screen.getByText('view issue').closest('a')).toHaveAttribute('href', '/issues/issue-7')
+    expect(screen.getByText('view trace').closest('a')).toHaveAttribute('href', '/traces/trace-42?projectId=proj-1')
+    expect(screen.getByText('view issue').closest('a')).toHaveAttribute('href', '/issues/issue-7?projectId=proj-1')
     expect(screen.getByText('Skipped stages: shipped')).toBeInTheDocument()
   })
 })

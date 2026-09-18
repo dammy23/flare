@@ -22,7 +22,7 @@ afterAll(() => server.close())
 describe('ReplayDetailPage', () => {
   it('renders a download link per segment', async () => {
     render(
-      <MemoryRouter initialEntries={['/replays/replay-1']}>
+      <MemoryRouter initialEntries={['/replays/replay-1?projectId=proj-1']}>
         <Routes>
           <Route path="/replays/:replayId" element={<ReplayDetailPage />} />
         </Routes>

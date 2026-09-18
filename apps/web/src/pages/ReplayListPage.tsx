@@ -13,7 +13,7 @@ export function ReplayListPage({ projectId }: { projectId: string }) {
     <ul>
       {replays.map((replay) => (
         <li key={replay.id}>
-          <Link to={`/replays/${replay.id}`}>{replay.session_id}</Link>
+          <Link to={`/replays/${replay.id}?projectId=${encodeURIComponent(projectId)}`}>{replay.session_id}</Link>
           <span>{` — ${replay.segment_count} segments, ${replay.error_count} errors`}</span>
         </li>
       ))}

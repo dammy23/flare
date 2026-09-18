@@ -15,8 +15,10 @@ export async function fetchIssues(projectId: string): Promise<IssueSummary[]> {
   return IssueSummarySchema.array().parse(body)
 }
 
-export async function fetchIssue(issueId: string): Promise<IssueDetail> {
-  const response = await fetch(`${QUERY_API_BASE_URL}/api/v1/issues/${issueId}`)
+export async function fetchIssue(issueId: string, projectId: string): Promise<IssueDetail> {
+  const response = await fetch(
+    `${QUERY_API_BASE_URL}/api/v1/issues/${issueId}?projectId=${encodeURIComponent(projectId)}`
+  )
   const body = await response.json()
   return IssueDetailSchema.parse(body)
 }
@@ -48,8 +50,13 @@ export interface TraceSpan {
   duration_ms: number
 }
 
-export async function fetchTrace(traceId: string): Promise<{ transactions: TraceTransaction[]; spans: TraceSpan[] }> {
-  const response = await fetch(`${QUERY_API_BASE_URL}/api/v1/traces/${traceId}`)
+export async function fetchTrace(
+  traceId: string,
+  projectId: string
+): Promise<{ transactions: TraceTransaction[]; spans: TraceSpan[] }> {
+  const response = await fetch(
+    `${QUERY_API_BASE_URL}/api/v1/traces/${traceId}?projectId=${encodeURIComponent(projectId)}`
+  )
   return response.json()
 }
 
@@ -73,13 +80,19 @@ export async function fetchReplays(projectId: string): Promise<ReplaySummary[]> 
   return response.json()
 }
 
-export async function fetchReplay(replayId: string): Promise<{ id: string; session_id: string; segments: ReplaySegmentDto[] }> {
-  const response = await fetch(`${QUERY_API_BASE_URL}/api/v1/replays/${replayId}`)
+export async function fetchReplay(
+  replayId: string,
+  projectId: string
+): Promise<{ id: string; session_id: string; segments: ReplaySegmentDto[] }> {
+  const response = await fetch(
+    `${QUERY_API_BASE_URL}/api/v1/replays/${replayId}?projectId=${encodeURIComponent(projectId)}`
+  )
   return response.json()
 }
 
 export interface FlowTraceDto {
   id: string
+  project_id: string
   status: string
   current_stage: string | null
   started_at: string
@@ -104,9 +117,12 @@ export interface FlowDeviationsDto {
 }
 
 export async function fetchFlow(
-  flowTraceId: string
+  flowTraceId: string,
+  projectId: string
 ): Promise<{ trace: FlowTraceDto; steps: FlowStepDto[]; deviations: FlowDeviationsDto | null }> {
-  const response = await fetch(`${QUERY_API_BASE_URL}/api/v1/flows/${flowTraceId}`)
+  const response = await fetch(
+    `${QUERY_API_BASE_URL}/api/v1/flows/${flowTraceId}?projectId=${encodeURIComponent(projectId)}`
+  )
   return response.json()
 }
 

@@ -14,7 +14,7 @@ export function IssueListPage({ projectId }: { projectId: string }) {
     <ul>
       {issues.map((issue) => (
         <li key={issue.id}>
-          <Link to={`/issues/${issue.id}`}>{issue.title}</Link>
+          <Link to={`/issues/${issue.id}?projectId=${encodeURIComponent(projectId)}`}>{issue.title}</Link>
           {issue.culprit && (
             <span>
               {' — '}

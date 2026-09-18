@@ -27,5 +27,6 @@ describe('IssueListPage', () => {
 
     await waitFor(() => expect(screen.getByText('TypeError: boom')).toBeInTheDocument())
     expect(screen.getByText('main in app.js')).toBeInTheDocument()
+    expect(screen.getByText('TypeError: boom').closest('a')).toHaveAttribute('href', '/issues/issue-1?projectId=proj-1')
   })
 })

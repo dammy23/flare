@@ -36,5 +36,6 @@ describe('FlowBoardPage', () => {
     expect(screen.getByText('mastered')).toBeInTheDocument()
     expect(screen.getByText('flow-1')).toBeInTheDocument()
     expect(screen.getByText('— stalled, last active 2026-09-18T10:00:00.000Z')).toBeInTheDocument()
+    expect(screen.getByText('flow-1').closest('a')).toHaveAttribute('href', '/flows/flow-1?projectId=proj-1')
   })
 })

@@ -21,7 +21,7 @@ afterAll(() => server.close())
 describe('TraceDetailPage', () => {
   it('renders the transaction name and its span durations', async () => {
     render(
-      <MemoryRouter initialEntries={['/traces/trace-1']}>
+      <MemoryRouter initialEntries={['/traces/trace-1?projectId=proj-1']}>
         <Routes>
           <Route path="/traces/:traceId" element={<TraceDetailPage />} />
         </Routes>

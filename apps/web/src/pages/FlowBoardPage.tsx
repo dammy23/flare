@@ -17,7 +17,7 @@ export function FlowBoardPage({ projectId }: { projectId: string }) {
           <ul>
             {group.traces.map((trace) => (
               <li key={trace.id}>
-                <Link to={`/flows/${trace.id}`}>{trace.id}</Link>
+                <Link to={`/flows/${trace.id}?projectId=${encodeURIComponent(projectId)}`}>{trace.id}</Link>
                 <span>{` — ${trace.status}, last active ${trace.lastActivityAt}`}</span>
               </li>
             ))}

@@ -42,7 +42,7 @@ afterAll(() => server.close())
 describe('IssueDetailPage', () => {
   it('renders resolved frame locations readably instead of raw JSON', async () => {
     render(
-      <MemoryRouter initialEntries={['/issues/issue-1']}>
+      <MemoryRouter initialEntries={['/issues/issue-1?projectId=proj-1']}>
         <Routes>
           <Route path="/issues/:issueId" element={<IssueDetailPage />} />
         </Routes>

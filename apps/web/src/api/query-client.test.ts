@@ -37,7 +37,7 @@ describe('fetchIssues', () => {
 
 describe('fetchIssue', () => {
   it('returns issue detail', async () => {
-    const issue = await fetchIssue('issue-1')
+    const issue = await fetchIssue('issue-1', 'proj-1')
     expect(issue.id).toBe('issue-1')
     expect(issue.events).toEqual([])
   })
