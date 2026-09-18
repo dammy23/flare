@@ -13,6 +13,7 @@
     "@fastify/cors": "^9.0.0",
     "@flare/db": "workspace:*",
     "@flare/shared-types": "workspace:*",
+    "@flare/storage": "workspace:*",
     "fastify": "^4.28.0",
     "ioredis": "^5.4.0",
     "kysely": "^0.27.0"

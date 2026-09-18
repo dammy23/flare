@@ -5,7 +5,7 @@ import { buildApp } from '../app'
 
 const db = createDb(process.env.DATABASE_URL ?? 'postgres://flare:flare@localhost:5432/flare')
 const redis = new Redis(process.env.REDIS_URL ?? 'redis://localhost:6379')
-const app = buildApp({ db, redis })
+const app = buildApp({ db, redis, storage: {} as never })
 
 afterAll(async () => {
   await db.destroy()
