@@ -1,0 +1,120 @@
+.flare-shell {
+  display: flex;
+  min-height: 100%;
+}
+
+.flare-sidebar {
+  width: var(--flare-sidebar-width);
+  flex-shrink: 0;
+  background: var(--flare-surface);
+  border-right: 1px solid var(--flare-border);
+  padding: var(--flare-space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--flare-space-5);
+}
+
+.flare-sidebar__logo {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--flare-accent);
+}
+
+.flare-sidebar__section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--flare-space-1);
+}
+
+.flare-sidebar__section-title {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--flare-text-faint);
+  padding: 0 var(--flare-space-2);
+  margin-bottom: var(--flare-space-1);
+}
+
+.flare-nav-link {
+  display: block;
+  padding: 8px var(--flare-space-2);
+  border-radius: var(--flare-radius-sm);
+  color: var(--flare-text-muted);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.flare-nav-link:hover {
+  background: var(--flare-surface-raised);
+  color: var(--flare-text);
+  text-decoration: none;
+}
+
+.flare-nav-link--active {
+  background: var(--flare-accent-bg);
+  color: var(--flare-accent);
+}
+
+.flare-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.flare-topbar {
+  height: var(--flare-topbar-height);
+  flex-shrink: 0;
+  border-bottom: 1px solid var(--flare-border);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 0 var(--flare-space-5);
+}
+
+.flare-topbar__user {
+  display: flex;
+  align-items: center;
+  gap: var(--flare-space-3);
+  font-size: 13px;
+  color: var(--flare-text-muted);
+}
+
+.flare-content {
+  flex: 1;
+  padding: var(--flare-space-5);
+  overflow: auto;
+}
+
+.flare-auth-screen {
+  min-height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.flare-auth-card {
+  width: 360px;
+  padding: var(--flare-space-6);
+}
+
+.flare-auth-card__logo {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--flare-accent);
+  margin-bottom: var(--flare-space-5);
+  text-align: center;
+}
+
+.flare-auth-error {
+  color: var(--flare-danger);
+  font-size: 13px;
+  margin-bottom: var(--flare-space-3);
+}
+
+.flare-auth-switch {
+  margin-top: var(--flare-space-4);
+  font-size: 13px;
+  color: var(--flare-text-muted);
+  text-align: center;
+}

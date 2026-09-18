@@ -1,0 +1,48 @@
+/*
+ * Flare design tokens. Sentry-like structure (dark, information-dense,
+ * developer-tool chrome) with a distinct identity: warm amber/orange
+ * accent on a graphite base, instead of Sentry's purple/violet.
+ */
+:root {
+  /* Surfaces */
+  --flare-bg: #14161a;
+  --flare-surface: #1c1f26;
+  --flare-surface-raised: #242832;
+  --flare-border: #2e323d;
+  --flare-border-strong: #3a3f4c;
+
+  /* Text */
+  --flare-text: #e8e9ec;
+  --flare-text-muted: #9a9fad;
+  --flare-text-faint: #6b7080;
+
+  /* Brand */
+  --flare-accent: #ff8a3d;
+  --flare-accent-strong: #ffb703;
+  --flare-accent-bg: rgba(255, 138, 61, 0.14);
+
+  /* Semantic */
+  --flare-danger: #f2495c;
+  --flare-danger-bg: rgba(242, 73, 92, 0.14);
+  --flare-success: #3fb950;
+  --flare-success-bg: rgba(63, 185, 80, 0.14);
+  --flare-warning: #e3b341;
+  --flare-warning-bg: rgba(227, 179, 65, 0.14);
+  --flare-info: #58a6ff;
+  --flare-info-bg: rgba(88, 166, 255, 0.14);
+
+  /* Layout */
+  --flare-sidebar-width: 220px;
+  --flare-topbar-height: 56px;
+  --flare-radius-sm: 4px;
+  --flare-radius-md: 8px;
+  --flare-space-1: 4px;
+  --flare-space-2: 8px;
+  --flare-space-3: 12px;
+  --flare-space-4: 16px;
+  --flare-space-5: 24px;
+  --flare-space-6: 32px;
+
+  --flare-font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --flare-font-mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
+}

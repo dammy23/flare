@@ -1,0 +1,63 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--flare-bg);
+  color: var(--flare-text);
+  font-family: var(--flare-font);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+a {
+  color: var(--flare-accent);
+  text-decoration: none;
+}
+
+a:hover {
+  color: var(--flare-accent-strong);
+  text-decoration: underline;
+}
+
+h1,
+h2,
+h3 {
+  margin: 0 0 var(--flare-space-3) 0;
+  font-weight: 600;
+}
+
+h1 {
+  font-size: 20px;
+}
+
+h2 {
+  font-size: 16px;
+}
+
+h3 {
+  font-size: 14px;
+  color: var(--flare-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+code,
+pre {
+  font-family: var(--flare-font-mono);
+}

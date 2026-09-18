@@ -1,0 +1,171 @@
+/* Button */
+.flare-button {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--flare-space-2);
+  padding: 6px 14px;
+  border-radius: var(--flare-radius-sm);
+  border: 1px solid var(--flare-border-strong);
+  background: var(--flare-surface-raised);
+  color: var(--flare-text);
+  font-family: var(--flare-font);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.12s, border-color 0.12s;
+}
+
+.flare-button:hover {
+  border-color: var(--flare-text-faint);
+}
+
+.flare-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.flare-button--primary {
+  background: var(--flare-accent);
+  border-color: var(--flare-accent);
+  color: #1a1200;
+}
+
+.flare-button--primary:hover {
+  background: var(--flare-accent-strong);
+  border-color: var(--flare-accent-strong);
+}
+
+.flare-button--danger {
+  background: transparent;
+  border-color: var(--flare-danger);
+  color: var(--flare-danger);
+}
+
+.flare-button--danger:hover {
+  background: var(--flare-danger-bg);
+}
+
+/* Card */
+.flare-card {
+  background: var(--flare-surface);
+  border: 1px solid var(--flare-border);
+  border-radius: var(--flare-radius-md);
+  padding: var(--flare-space-4);
+}
+
+.flare-card__title {
+  margin: 0 0 var(--flare-space-3) 0;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* Badge */
+.flare-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+}
+
+.flare-badge--danger {
+  background: var(--flare-danger-bg);
+  color: var(--flare-danger);
+}
+
+.flare-badge--success {
+  background: var(--flare-success-bg);
+  color: var(--flare-success);
+}
+
+.flare-badge--warning {
+  background: var(--flare-warning-bg);
+  color: var(--flare-warning);
+}
+
+.flare-badge--info {
+  background: var(--flare-info-bg);
+  color: var(--flare-info);
+}
+
+.flare-badge--neutral {
+  background: var(--flare-surface-raised);
+  color: var(--flare-text-muted);
+}
+
+/* Table */
+.flare-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.flare-table th {
+  text-align: left;
+  padding: var(--flare-space-2) var(--flare-space-3);
+  color: var(--flare-text-muted);
+  font-weight: 500;
+  border-bottom: 1px solid var(--flare-border);
+}
+
+.flare-table td {
+  padding: var(--flare-space-3);
+  border-bottom: 1px solid var(--flare-border);
+  vertical-align: top;
+}
+
+.flare-table tbody tr:hover {
+  background: var(--flare-surface-raised);
+}
+
+/* Input */
+.flare-input,
+.flare-select {
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: var(--flare-radius-sm);
+  border: 1px solid var(--flare-border-strong);
+  background: var(--flare-surface);
+  color: var(--flare-text);
+  font-family: var(--flare-font);
+  font-size: 13px;
+}
+
+.flare-input:focus,
+.flare-select:focus {
+  outline: none;
+  border-color: var(--flare-accent);
+}
+
+.flare-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--flare-space-1);
+  margin-bottom: var(--flare-space-4);
+}
+
+.flare-field label {
+  font-size: 12px;
+  color: var(--flare-text-muted);
+}
+
+/* EmptyState */
+.flare-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--flare-space-2);
+  padding: var(--flare-space-6);
+  color: var(--flare-text-muted);
+  text-align: center;
+}
+
+.flare-empty-state__title {
+  color: var(--flare-text);
+  font-weight: 600;
+}
