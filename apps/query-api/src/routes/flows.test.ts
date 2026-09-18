@@ -41,7 +41,7 @@ describe('GET /api/v1/flows/:flowTraceId', () => {
       status: 'ok',
     })
 
-    const response = await app.inject({ method: 'GET', url: `/api/v1/flows/${flowTraceId}` })
+    const response = await app.inject({ method: 'GET', url: `/api/v1/flows/${flowTraceId}?projectId=${project.id}` })
 
     expect(response.statusCode).toBe(200)
     const body = response.json()
@@ -49,9 +49,33 @@ describe('GET /api/v1/flows/:flowTraceId', () => {
     expect(body.steps).toHaveLength(1)
     expect(body.steps[0].stage_name).toBe('received')
     expect(body.deviations).toBeNull()
+
+    const otherProject = await db
+      .insertInto('project')
+      .values({ name: 'Other Flow Project', slug: `other-flow-${Date.now()}`, public_key: `pk-other-flow-${Date.now()}` })
+      .returningAll()
+      .executeTakeFirstOrThrow()
+    const crossProjectResponse = await app.inject({
+      method: 'GET',
+      url: `/api/v1/flows/${flowTraceId}?projectId=${otherProject.id}`,
+    })
+    expect(crossProjectResponse.statusCode).toBe(404)
   })
 
   it('returns 404 for an unknown flow trace', async () => {
+    const project = await db
+      .insertInto('project')
+      .values({ name: 'Unknown Flow Test', slug: `unknown-flow-${Date.now()}`, public_key: `pk-unknown-flow-${Date.now()}` })
+      .returningAll()
+      .executeTakeFirstOrThrow()
+    const response = await app.inject({
+      method: 'GET',
+      url: `/api/v1/flows/00000000-0000-0000-0000-000000000000?projectId=${project.id}`,
+    })
+    expect(response.statusCode).toBe(404)
+  })
+
+  it('returns 404 when projectId is missing entirely', async () => {
     const response = await app.inject({
       method: 'GET',
       url: '/api/v1/flows/00000000-0000-0000-0000-000000000000',

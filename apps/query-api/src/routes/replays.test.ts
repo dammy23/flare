@@ -52,14 +52,38 @@ describe('replays', () => {
     expect(listResponse.statusCode).toBe(200)
     expect(listResponse.json().some((r: { id: string }) => r.id === replay.id)).toBe(true)
 
-    const detailResponse = await app.inject({ method: 'GET', url: `/api/v1/replays/${replay.id}` })
+    const detailResponse = await app.inject({ method: 'GET', url: `/api/v1/replays/${replay.id}?projectId=${project.id}` })
     expect(detailResponse.statusCode).toBe(200)
     const body = detailResponse.json()
     expect(body.segments).toHaveLength(1)
     expect(body.segments[0].downloadUrl).toContain('0.bin')
+
+    const otherProject = await db
+      .insertInto('project')
+      .values({ name: 'Other Replay Project', slug: `other-replay-${Date.now()}`, public_key: `pk-other-replay-${Date.now()}` })
+      .returningAll()
+      .executeTakeFirstOrThrow()
+    const crossProjectResponse = await app.inject({
+      method: 'GET',
+      url: `/api/v1/replays/${replay.id}?projectId=${otherProject.id}`,
+    })
+    expect(crossProjectResponse.statusCode).toBe(404)
   })
 
   it('returns 404 for an unknown replay', async () => {
+    const project = await db
+      .insertInto('project')
+      .values({ name: 'Unknown Replay Test', slug: `unknown-replay-${Date.now()}`, public_key: `pk-unknown-replay-${Date.now()}` })
+      .returningAll()
+      .executeTakeFirstOrThrow()
+    const response = await app.inject({
+      method: 'GET',
+      url: `/api/v1/replays/00000000-0000-0000-0000-000000000000?projectId=${project.id}`,
+    })
+    expect(response.statusCode).toBe(404)
+  })
+
+  it('returns 404 when projectId is missing entirely', async () => {
     const response = await app.inject({ method: 'GET', url: '/api/v1/replays/00000000-0000-0000-0000-000000000000' })
     expect(response.statusCode).toBe(404)
   })

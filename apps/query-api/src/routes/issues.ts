@@ -25,38 +25,44 @@ export function registerIssueRoutes(app: FastifyInstance): void {
     }
   )
 
-  app.get<{ Params: { issueId: string } }>('/api/v1/issues/:issueId', async (request, reply) => {
-    const issue = await app.deps.db
-      .selectFrom('issue')
-      .selectAll()
-      .where('id', '=', request.params.issueId)
-      .executeTakeFirst()
+  app.get<{ Params: { issueId: string }; Querystring: { projectId?: string } }>(
+    '/api/v1/issues/:issueId',
+    async (request, reply) => {
+      if (!request.query.projectId) return reply.code(404).send({ error: 'not found' })
 
-    if (!issue) return reply.code(404).send({ error: 'not found' })
+      const issue = await app.deps.db
+        .selectFrom('issue')
+        .selectAll()
+        .where('id', '=', request.params.issueId)
+        .where('project_id', '=', request.query.projectId)
+        .executeTakeFirst()
 
-    const events = await app.deps.db
-      .selectFrom('event')
-      .selectAll()
-      .where('issue_id', '=', issue.id)
-      .orderBy('timestamp', 'desc')
-      .limit(50)
-      .execute()
+      if (!issue) return reply.code(404).send({ error: 'not found' })
 
-    const detail: IssueDetail = {
-      id: issue.id,
-      title: issue.title,
-      culprit: issue.culprit,
-      status: issue.status,
-      timesSeen: issue.times_seen,
-      firstSeen: issue.first_seen.toISOString(),
-      lastSeen: issue.last_seen.toISOString(),
-      events: events.map((event) => ({
-        id: event.id,
-        timestamp: event.timestamp.toISOString(),
-        message: event.message,
-        exception: event.exception,
-      })),
+      const events = await app.deps.db
+        .selectFrom('event')
+        .selectAll()
+        .where('issue_id', '=', issue.id)
+        .orderBy('timestamp', 'desc')
+        .limit(50)
+        .execute()
+
+      const detail: IssueDetail = {
+        id: issue.id,
+        title: issue.title,
+        culprit: issue.culprit,
+        status: issue.status,
+        timesSeen: issue.times_seen,
+        firstSeen: issue.first_seen.toISOString(),
+        lastSeen: issue.last_seen.toISOString(),
+        events: events.map((event) => ({
+          id: event.id,
+          timestamp: event.timestamp.toISOString(),
+          message: event.message,
+          exception: event.exception,
+        })),
+      }
+      return detail
     }
-    return detail
-  })
+  )
 }

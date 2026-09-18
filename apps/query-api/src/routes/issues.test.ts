@@ -66,10 +66,10 @@ describe('GET /api/v1/projects/:projectId/issues', () => {
 })
 
 describe('GET /api/v1/issues/:issueId', () => {
-  it('returns issue detail with its events', async () => {
-    const { issue } = await seedIssueWithEvent()
+  it('returns issue detail with its events when projectId matches', async () => {
+    const { project, issue } = await seedIssueWithEvent()
 
-    const response = await app.inject({ method: 'GET', url: `/api/v1/issues/${issue.id}` })
+    const response = await app.inject({ method: 'GET', url: `/api/v1/issues/${issue.id}?projectId=${project.id}` })
 
     expect(response.statusCode).toBe(200)
     const body = response.json()
@@ -78,6 +78,27 @@ describe('GET /api/v1/issues/:issueId', () => {
   })
 
   it('returns 404 for an unknown issue', async () => {
+    const { project } = await seedIssueWithEvent()
+    const response = await app.inject({
+      method: 'GET',
+      url: `/api/v1/issues/00000000-0000-0000-0000-000000000000?projectId=${project.id}`,
+    })
+    expect(response.statusCode).toBe(404)
+  })
+
+  it('returns 404 when projectId does not match the issue (no cross-project leakage)', async () => {
+    const { issue } = await seedIssueWithEvent()
+    const otherProject = await db
+      .insertInto('project')
+      .values({ name: 'Other Project', slug: `other-project-${Date.now()}`, public_key: `pk-other-${Date.now()}` })
+      .returningAll()
+      .executeTakeFirstOrThrow()
+
+    const response = await app.inject({ method: 'GET', url: `/api/v1/issues/${issue.id}?projectId=${otherProject.id}` })
+    expect(response.statusCode).toBe(404)
+  })
+
+  it('returns 404 when projectId is missing entirely', async () => {
     const response = await app.inject({ method: 'GET', url: '/api/v1/issues/00000000-0000-0000-0000-000000000000' })
     expect(response.statusCode).toBe(404)
   })

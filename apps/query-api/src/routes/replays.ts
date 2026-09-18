@@ -10,8 +10,15 @@ export function registerReplayRoutes(app: FastifyInstance): void {
       .execute()
   })
 
-  app.get<{ Params: { id: string } }>('/api/v1/replays/:id', async (request, reply) => {
-    const replay = await app.deps.db.selectFrom('replay').selectAll().where('id', '=', request.params.id).executeTakeFirst()
+  app.get<{ Params: { id: string }; Querystring: { projectId?: string } }>('/api/v1/replays/:id', async (request, reply) => {
+    if (!request.query.projectId) return reply.code(404).send({ error: 'not found' })
+
+    const replay = await app.deps.db
+      .selectFrom('replay')
+      .selectAll()
+      .where('id', '=', request.params.id)
+      .where('project_id', '=', request.query.projectId)
+      .executeTakeFirst()
     if (!replay) return reply.code(404).send({ error: 'not found' })
 
     const segments = await app.deps.db
