@@ -15,6 +15,7 @@ export interface Database {
   transaction_latency_rollup: TransactionLatencyRollupTable
   replay: ReplayTable
   replay_segment: ReplaySegmentTable
+  raw_envelope: RawEnvelopeTable
 }
 
 export interface ProjectTable {
@@ -163,4 +164,12 @@ export interface ReplaySegmentTable {
   storage_key: string
   size_bytes: number
   started_at: Generated<Date>
+}
+
+export interface RawEnvelopeTable {
+  id: Generated<string>
+  project_id: string
+  event_id: string | null
+  raw_bytes: Buffer
+  received_at: Generated<Date>
 }
